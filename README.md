@@ -25,8 +25,4 @@ The extension extends the login page and provides 2 extra pages: `acs.php` (Asse
 
 ### Remaining work to be done
 
- - De-hardcode the configuration!!
- - Check what is the best/proper location for the two `acs.php` and `sls.php` pages.
  - Provide a page (in iTop) to generate the *metadata* required for configuring iTop as a *remote Service Provider* on the SAML server.
- - Proper integration of the logoff process
- - Localization...
