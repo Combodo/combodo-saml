@@ -1,17 +1,26 @@
 <?php
 
-require_once('../../approot.inc.php');
+require_once('../approot.inc.php');
 require_once (APPROOT.'bootstrap.inc.php');
 require_once (APPROOT.'application/startup.inc.php');
 
+/////////////////////////////////////////////////////////////////////
+// Main program
+//
+LoginWebPage::DoLogin(); // Check user rights and prompt if needed
+ApplicationMenu::CheckMenuIdEnabled('ConfigGenerateSimpleSaml');
+
 $sPath = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
+$aSP = MetaModel::GetModuleSetting('combodo-saml', 'sp', array());
+$sACSBinding = $aSP['assertionConsumerService']['binding'];
+$sSLSBinding = $aSP['singleLogoutService']['binding'];
 
 $sConfig = '$metadata[\''.$sPath.'\'] = array (
 	\'SingleLogoutService\' =>
 		array (
 			0 =>
 				array (
-					\'Binding\' => \'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\',
+					\'Binding\' => \''.$sSLSBinding.'\',
 					\'Location\' => \''.$sPath.'/sls.php\',
 				),
 		),
@@ -20,7 +29,7 @@ $sConfig = '$metadata[\''.$sPath.'\'] = array (
 			0 =>
 				array (
 					\'index\' => 0,
-					\'Binding\' => \'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\',
+					\'Binding\' => \''.$sACSBinding.'\',
 					\'Location\' => \''.$sPath.'/acs.php\',
 				),
 			1 =>
@@ -45,6 +54,13 @@ $sConfig = '$metadata[\''.$sPath.'\'] = array (
 );
 ';
 
-echo "<pre>\n";
-echo "Append this conf to : simplesamlphp/metadata/saml20-sp-remote.php\n\n";
-echo $sConfig;
+$sTitle = Dict::S('SAML:SimpleSaml:GenerateSimpleSamlConf');
+$oP = new iTopWebPage($sTitle);
+$oP->add(Dict::S('SAML:SimpleSaml:Instructions'));
+$oP->add("<pre>");
+$oP->add("\n\n");
+$oP->add($sConfig);
+$oP->add("\n");
+$oP->add("</pre>");
+$oP->output();
+

@@ -7,3 +7,30 @@
 require_once __DIR__.'/src/Config.php';
 require_once __DIR__.'/src/SAMLLoginExtension.php';
 require_once __DIR__.'/vendor/autoload.php';
+
+//
+// Menus
+//
+class CombodoSamlMenuHandler extends ModuleHandlerAPI
+{
+	/**
+	 * Create the menu to manage the configuration of the extension, but only for
+	 * users allowed to manage the configuration
+	 */
+	public static function OnMenuCreation()
+	{
+		$bConfigMenuEnabled = UserRights::IsActionAllowed('ResourceAdminMenu', UR_ACTION_MODIFY);
+		if ($bConfigMenuEnabled)
+		{
+			new WebPageMenuNode(
+				'ConfigGenerateSimpleSaml',
+				utils::GetAbsoluteUrlModulePage('combodo-saml', "generateconf.php"),
+				ApplicationMenu::GetMenuIndexById('ConfigEditor'),
+				50 ,
+				'ResourceAdminMenu',
+				UR_ACTION_MODIFY,
+				UR_ALLOWED_YES,
+				null);
+		}
+	}
+}
