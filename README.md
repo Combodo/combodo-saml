@@ -22,7 +22,3 @@ If you want to use the SimpleSAML server on customers, you **MUST** configure th
 A small extension to add the SAML SSO to iTop. The extension embeds the onelogin/php-saml library and can be deployed as any other iTop extension.
 
 The extension extends the login page and provides 2 extra pages: `acs.php` (Assertion Consumer Service, the return page after a successful login by SAML) and `sls.php` (Single Logout Service, the return page after a successful logout by SAML).
-
-### Remaining work to be done
-
- - Provide a page (in iTop) to generate the *metadata* required for configuring iTop as a *remote Service Provider* on the SAML server.
