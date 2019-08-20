@@ -38,6 +38,21 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 			{
 				$oConfig = new Config();
 				$oAuth = new Auth($oConfig->GetSettings());
+				if (!isset($_SESSION['saml_count']))
+				{
+					$_SESSION['saml_count'] = 1;
+				}
+				else
+				{
+					$_SESSION['saml_count'] += 1;
+				}
+				if ($_SESSION['saml_count'] > 2)
+				{
+					unset($_SESSION['saml_count']);
+					$this->bErrorOccurred = true;
+					$iErrorCode = LoginWebPage::EXIT_CODE_MISSINGLOGIN;
+					return LoginWebPage::LOGIN_FSM_RETURN_ERROR;
+				}
 				$oAuth->login(utils::GetAbsoluteUrlAppRoot().'pages/UI.php'); // Will redirect and exit
 			}
 		}
@@ -72,7 +87,12 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 	{
 		if ($_SESSION['login_mode'] == 'saml')
 		{
-			echo "<p>".Dict::S('SAML:Error:UserNotAllowed')."</p>";
+			if ($iErrorCode != LoginWebPage::EXIT_CODE_MISSINGLOGIN)
+			{
+
+				$oLoginWebPage = new LoginWebPage();
+				$oLoginWebPage->DisplayLogoutPage(false, Dict::S('SAML:Error:UserNotAllowed'));
+			}
 			exit();
 		}
 		return LoginWebPage::LOGIN_FSM_RETURN_CONTINUE;
