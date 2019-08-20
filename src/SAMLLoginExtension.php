@@ -54,6 +54,11 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 					return LoginWebPage::LOGIN_FSM_RETURN_ERROR;
 				}
 				$sOriginURL = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+				if (!utils::StartsWith($sOriginURL, utils::GetAbsoluteUrlAppRoot()))
+				{
+					// If the found URL does not start with the configured AppRoot URL
+					$sOriginURL = utils::GetAbsoluteUrlAppRoot().'pages/UI.php';
+				}
 				$oAuth->login($sOriginURL); // Will redirect and exit
 			}
 		}
