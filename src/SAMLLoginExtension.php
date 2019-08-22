@@ -12,7 +12,6 @@ use Dict;
 use iLogoutExtension;
 use LoginWebPage;
 use OneLogin\Saml2\Auth;
-use UserRights;
 use utils;
 
 class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExtension
@@ -69,12 +68,11 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 	{
 		if ($_SESSION['login_mode'] == 'saml')
 		{
-			$sAuthUser = $_SESSION['auth_user'];
-			if (!UserRights::CheckCredentials($sAuthUser, '', $_SESSION['login_mode'], 'external'))
-			{
-				$iErrorCode = LoginWebPage::EXIT_CODE_NOTAUTHORIZED;
-				return LoginWebPage::LOGIN_FSM_RETURN_ERROR;
-			}
+            if (!isset($_SESSION['auth_user']))
+            {
+                $iErrorCode = LoginWebPage::EXIT_CODE_WRONGCREDENTIALS;
+                return LoginWebPage::LOGIN_FSM_RETURN_ERROR;
+            }
 		}
 		return LoginWebPage::LOGIN_FSM_RETURN_CONTINUE;
 	}
@@ -84,6 +82,11 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 		if ($_SESSION['login_mode'] == 'saml')
 		{
 			$sAuthUser = $_SESSION['auth_user'];
+            if (!LoginWebPage::CheckUser($sAuthUser, ''))
+            {
+                $iErrorCode = LoginWebPage::EXIT_CODE_NOTAUTHORIZED;
+                return LoginWebPage::LOGIN_FSM_RETURN_ERROR;
+            }
 			LoginWebPage::OnLoginSuccess($sAuthUser, 'external', $_SESSION['login_mode']);
 		}
 		return LoginWebPage::LOGIN_FSM_RETURN_CONTINUE;
