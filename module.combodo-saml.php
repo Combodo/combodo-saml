@@ -56,7 +56,7 @@ SetupWebPage::AddModule(
 			// followed: Destination, NameId, Conditions ... are validated too.
 			'strict' => true,
 			// Enable debug mode (to print errors).
-			'debug' => true,
+			'debug' => false,
 			// Service Provider Data that we are deploying.
 			'sp' => array (
 				// Specifies info about where and how the <AuthnResponse> message MUST be
@@ -71,8 +71,8 @@ SetupWebPage::AddModule(
 				// attributeConsumingService. nameFormat, attributeValue and
 				// friendlyName can be omitted
 				"attributeConsumingService"=> array(
-					"serviceName" => "SP test",
-					"serviceDescription" => "Test Service",
+					"serviceName" => "",
+					"serviceDescription" => "",
 					"requestedAttributes" => array(
 						array(
 							"name" => "",
@@ -127,7 +127,7 @@ SetupWebPage::AddModule(
 				// SLO endpoint info of the IdP.
 				'singleLogoutService' => array (
 					// URL Location of the IdP where SLO Request will be sent.
-					'url' => 'https://customers.combodo.com/simplesaml/saml2/idp/SingleLogoutService.php',
+					'url' => '',
 					// URL location of the IdP where the SP will send the SLO Response (ResponseLocation)
 					// if not set, url for the SLO Request will be used
 					'responseUrl' => '',
