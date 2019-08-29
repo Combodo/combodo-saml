@@ -33,8 +33,9 @@ if (!$oAuth->isAuthenticated()) {
 $aUserAttributes = $oAuth->getAttributes();
 $_SESSION['auth_user'] = $aUserAttributes['uid'][0];
 $_SESSION['login_mode'] = 'saml';
+unset($_SESSION['login_will_redirect']);
 
 if (isset($_POST['RelayState']) && OneLogin\Saml2\Utils::getSelfURL() != $_POST['RelayState'])
 {
-	$oAuth->redirectTo($_POST['RelayState']);
+	$oAuth->redirectTo($_POST['RelayState'], array('login_saml' => 'connected'));
 }

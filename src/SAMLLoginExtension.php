@@ -9,12 +9,15 @@ namespace Combodo\iTop\Extension\Saml;
 
 use AbstractLoginFSMExtension;
 use Dict;
+use iLoginDataExtension;
 use iLogoutExtension;
+use LoginBlockData;
+use LoginTwigData;
 use LoginWebPage;
 use OneLogin\Saml2\Auth;
 use utils;
 
-class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExtension
+class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExtension, iLoginDataExtension
 {
 	private $bErrorOccurred = false;
 
@@ -37,20 +40,19 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 			{
 				$oConfig = new Config();
 				$oAuth = new Auth($oConfig->GetSettings());
-				if (!isset($_SESSION['saml_count']))
+				if (!isset($_SESSION['login_will_redirect']))
 				{
-					$_SESSION['saml_count'] = 1;
+					$_SESSION['login_will_redirect'] = true;
 				}
 				else
 				{
-					$_SESSION['saml_count'] += 1;
-				}
-				if ($_SESSION['saml_count'] > 2)
-				{
-					unset($_SESSION['saml_count']);
-					$this->bErrorOccurred = true;
-					$iErrorCode = LoginWebPage::EXIT_CODE_MISSINGLOGIN;
-					return LoginWebPage::LOGIN_FSM_RETURN_ERROR;
+				    if (empty(utils::ReadParam('login_saml')))
+                    {
+                        unset($_SESSION['login_will_redirect']);
+                        $this->bErrorOccurred = true;
+                        $iErrorCode = LoginWebPage::EXIT_CODE_MISSINGLOGIN;
+                        return LoginWebPage::LOGIN_FSM_RETURN_ERROR;
+                    }
 				}
 				$sOriginURL = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 				if (!utils::StartsWith($sOriginURL, utils::GetAbsoluteUrlAppRoot()))
@@ -98,11 +100,10 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 		{
 			if ($iErrorCode != LoginWebPage::EXIT_CODE_MISSINGLOGIN)
 			{
-
 				$oLoginWebPage = new LoginWebPage();
 				$oLoginWebPage->DisplayLogoutPage(false, Dict::S('SAML:Error:UserNotAllowed'));
+                exit();
 			}
-			exit();
 		}
 		return LoginWebPage::LOGIN_FSM_RETURN_CONTINUE;
 	}
@@ -126,6 +127,28 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 		$oAuth = new Auth($oConfig->GetSettings());
 		$oAuth->logout(utils::GetAbsoluteUrlAppRoot().'pages/UI.php'); // Will redirect and exit
 	}
+
+    /**
+     * @return LoginTwigData
+     */
+    public function GetLoginData()
+    {
+        $sPath = APPROOT.'env-'.utils::GetCurrentEnvironment().'/combodo-saml/view';
+        $oLoginData = new LoginTwigData(array(), $sPath);
+
+        $aData = array(
+            'sImagePath' => utils::GetAbsoluteUrlModulesRoot().'combodo-saml/view/saml.png',
+            'sLoginMode' => 'saml',
+            'sLabel' => 'Sign in with SAML',
+            'sTooltip' => 'Click here to authenticate yourself with the SAML server',
+        );
+        $oBlockData = new LoginBlockData('saml_sso_button.html.twig', $aData);
+
+        $oLoginData->AddBlockData('login_sso_buttons', $oBlockData);
+
+        return $oLoginData;
+
+    }
 }
 
 
