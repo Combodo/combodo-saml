@@ -14,5 +14,7 @@ Dict::Add('FR FR', 'French', 'Français', array(
 	'SAML:Error:NotAuthenticated' => 'Non authentifié',
 	'SAML:SimpleSaml:GenerateSimpleSamlConf' => 'Générer la configuration SimpleSaml',
 	'SAML:SimpleSaml:Instructions' => 'Ajouter ces lignes à la configuration: simplesamlphp/metadata/saml20-sp-remote.php',
+    'SAML:Login:SignIn' => 'S\'identifier avec SAML',
+    'SAML:Login:SignInTooltip' => 'Cliquer ici pour s\'identifier avec le serveur SAML',
 	'Menu:ConfigGenerateSimpleSaml' => 'Générer la configuration SimpleSaml',
 ));

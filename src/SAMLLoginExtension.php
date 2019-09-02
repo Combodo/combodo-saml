@@ -139,30 +139,14 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
         $aData = array(
             'sImagePath' => utils::GetAbsoluteUrlModulesRoot().'combodo-saml/view/saml.png',
             'sLoginMode' => 'saml',
-            'sLabel' => 'Sign in with SAML',
-            'sTooltip' => 'Click here to authenticate yourself with the SAML server',
+            'sLabel' => Dict::S('SAML:Login:SignIn'),
+            'sTooltip' => Dict::S('SAML:Login:SignInTooltip'),
         );
         $oBlockData = new LoginBlockData('saml_sso_button.html.twig', $aData);
 
         $oLoginData->AddBlockData('login_sso_buttons', $oBlockData);
 
         return $oLoginData;
-
     }
 }
 
-
-class SAMLLoginExtension2
-{
-	public function GetSocialButtons()
-	{
-		return array(
-			array(
-				'login_mode' => 'saml',
-				'label' => 'Login with SAML',
-				//'twig' => 'saml_button.twig',
-				'tooltip' => 'Here is a SAML specific tooltip',
-			),
-		);
-	}
-}
