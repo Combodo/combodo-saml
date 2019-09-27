@@ -51,7 +51,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
                         unset($_SESSION['login_will_redirect']);
                         $this->bErrorOccurred = true;
                         $iErrorCode = LoginWebPage::EXIT_CODE_MISSINGLOGIN;
-                        return LoginWebPage::LOGIN_FSM_RETURN_ERROR;
+                        return LoginWebPage::LOGIN_FSM_ERROR;
                     }
 				}
 				$sOriginURL = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
@@ -63,7 +63,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 				$oAuth->login($sOriginURL); // Will redirect and exit
 			}
 		}
-		return LoginWebPage::LOGIN_FSM_RETURN_CONTINUE;
+		return LoginWebPage::LOGIN_FSM_CONTINUE;
 	}
 
 	protected function OnCheckCredentials(&$iErrorCode)
@@ -73,10 +73,10 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
             if (!isset($_SESSION['auth_user']))
             {
                 $iErrorCode = LoginWebPage::EXIT_CODE_WRONGCREDENTIALS;
-                return LoginWebPage::LOGIN_FSM_RETURN_ERROR;
+                return LoginWebPage::LOGIN_FSM_ERROR;
             }
 		}
-		return LoginWebPage::LOGIN_FSM_RETURN_CONTINUE;
+		return LoginWebPage::LOGIN_FSM_CONTINUE;
 	}
 
 	protected function OnCredentialsOK(&$iErrorCode)
@@ -87,11 +87,11 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
             if (!LoginWebPage::CheckUser($sAuthUser))
             {
                 $iErrorCode = LoginWebPage::EXIT_CODE_NOTAUTHORIZED;
-                return LoginWebPage::LOGIN_FSM_RETURN_ERROR;
+                return LoginWebPage::LOGIN_FSM_ERROR;
             }
 			LoginWebPage::OnLoginSuccess($sAuthUser, 'external', $_SESSION['login_mode']);
 		}
-		return LoginWebPage::LOGIN_FSM_RETURN_CONTINUE;
+		return LoginWebPage::LOGIN_FSM_CONTINUE;
 	}
 
 	protected function OnError(&$iErrorCode)
@@ -105,7 +105,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
                 exit();
 			}
 		}
-		return LoginWebPage::LOGIN_FSM_RETURN_CONTINUE;
+		return LoginWebPage::LOGIN_FSM_CONTINUE;
 	}
 
 	protected function OnConnected(&$iErrorCode)
@@ -115,7 +115,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 			$_SESSION['can_logoff'] = true;
 			return LoginWebPage::CheckLoggedUser($iErrorCode);
 		}
-		return LoginWebPage::LOGIN_FSM_RETURN_CONTINUE;
+		return LoginWebPage::LOGIN_FSM_CONTINUE;
 	}
 
 	/**
@@ -130,6 +130,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 
     /**
      * @return LoginTwigData
+     * @throws \Exception
      */
     public function GetLoginData()
     {
