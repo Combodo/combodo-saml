@@ -9,7 +9,7 @@ namespace Combodo\iTop\Extension\Saml;
 
 use AbstractLoginFSMExtension;
 use Dict;
-use iLoginDataExtension;
+use iLoginUIExtension;
 use iLogoutExtension;
 use LoginBlockData;
 use LoginTwigData;
@@ -17,7 +17,7 @@ use LoginWebPage;
 use OneLogin\Saml2\Auth;
 use utils;
 
-class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExtension, iLoginDataExtension
+class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExtension, iLoginUIExtension
 {
 	private $bErrorOccurred = false;
 
@@ -132,7 +132,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
      * @return LoginTwigData
      * @throws \Exception
      */
-    public function GetLoginData()
+    public function GetTwigBlockData()
     {
         $sPath = APPROOT.'env-'.utils::GetCurrentEnvironment().'/combodo-saml/view';
         $oLoginData = new LoginTwigData(array(), $sPath);
