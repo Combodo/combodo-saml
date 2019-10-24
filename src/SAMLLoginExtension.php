@@ -11,8 +11,8 @@ use AbstractLoginFSMExtension;
 use Dict;
 use iLoginUIExtension;
 use iLogoutExtension;
-use LoginBlockData;
-use LoginTwigData;
+use LoginBlockExtension;
+use LoginTwigContext;
 use LoginWebPage;
 use OneLogin\Saml2\Auth;
 use utils;
@@ -129,13 +129,13 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 	}
 
     /**
-     * @return LoginTwigData
+     * @return LoginTwigContext
      * @throws \Exception
      */
-    public function GetTwigBlockData()
+    public function GetTwigContext()
     {
-        $sPath = APPROOT.'env-'.utils::GetCurrentEnvironment().'/combodo-saml/view';
-        $oLoginData = new LoginTwigData(array(), $sPath);
+        $oLoginContext = new LoginTwigContext();
+	    $oLoginContext->SetLoaderPath(utils::GetAbsoluteModulePath('combodo-saml').'view');
 
         $aData = array(
             'sImagePath' => utils::GetAbsoluteUrlModulesRoot().'combodo-saml/view/saml.png',
@@ -143,11 +143,11 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
             'sLabel' => Dict::S('SAML:Login:SignIn'),
             'sTooltip' => Dict::S('SAML:Login:SignInTooltip'),
         );
-        $oBlockData = new LoginBlockData('saml_sso_button.html.twig', $aData);
+        $oBlockExtension = new LoginBlockExtension('saml_sso_button.html.twig', $aData);
 
-        $oLoginData->AddBlockData('login_sso_buttons', $oBlockData);
+        $oLoginContext->AddBlockExtension('login_sso_buttons', $oBlockExtension);
 
-        return $oLoginData;
+	    return $oLoginContext;
     }
 }
 
