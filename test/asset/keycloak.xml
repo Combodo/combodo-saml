@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2016 Red Hat, Inc. and/or its affiliates
+  ~ and other contributors as indicated by the @author tags.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<EntitiesDescriptor Name="urn:keycloak" xmlns="urn:oasis:names:tc:SAML:2.0:metadata"
+					xmlns:dsig="http://www.w3.org/2000/09/xmldsig#">
+	<EntityDescriptor entityID="https://idp.test.com/auth/realms/idp">
+		<IDPSSODescriptor WantAuthnRequestsSigned="true"
+			protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+                        <KeyDescriptor use="signing">
+                          <dsig:KeyInfo>
+                            <dsig:KeyName>YmqSkJVwEv2CEqMmMfiHqcQPpkla7ic9LHYKzzATinM</dsig:KeyName>
+                            <dsig:X509Data>
+                              <dsig:X509Certificate>MIICnzCCAYcCBgFsYlPGbzANBgkqhkiG9w0BAQsFADATMREwDwYDVQQDDAhlZGlmaXhpbzAeFw0xOTA4MDUxNTA3MzNaFw0yOTA4MDUxNTA5MTNaMBMxETAPBgNVBAMMCGVkaWZpeGlvMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr13B/3RKIP518TROuu3QyTL7bAClgTr8pqXOk6Gtdc8z5dCPlFjwVZ2fel1v0J1s3xdTWRfRAC3juMs7PPcfRuPNokxWVKYjPjpi6rtLLCneY6QDP33kzIEHVZfC8By2Tx7F0BVXb9MizrW2R7Ww8QbVja7JPMefG+pL247/5wPVWG+25KAA+UjaPenNel+kTPHu2E8CT2L/N4bdu85C/wwLlqVkcUlxSIPz4eX37bIfj8nbAGzuAIipx2uWmi/0Qz8BoYVlFBvmcAohjW7GTDwRO0xdW/hMwajslNey+Xio/ss8aTSUWD4rmeTvJfq68v8e9xoIYS5WWCb8JwzHFwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCSGOazWfsuIxsOcV3I6C8MNvhN1HZMauhd8TfDc8Z2PmmaOqirHffwQzLIO4mDlMqRPRLvD4AFqhCOsD6eLfYzOsBtLTxd/uxDTFgi09TsEaTM1OzvwugB46eN6e7cFTdcN2ygFk1e4JPNqBXZay/bZj2Xkeyba0hp1QthOWDyud3cnwVRl/iEU65lSi+dSqNzeEflQIk3gA9rq4+rS4/uXxCW3AL6FoA6KML8kql/QeC4Y0+d3Ff465fHchu5ZKXgjzuKBLiyrIII3JqL9r/Wo4Cw3YEXVzktwCyzvll07siMMJHuIKQZWi68e4NvIy9bhjcCL0JtWvUP3/s7w3wJ</dsig:X509Certificate>
+                            </dsig:X509Data>
+                          </dsig:KeyInfo>
+                        </KeyDescriptor>
+
+			<SingleLogoutService
+					Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+					Location="https://idp.test.com/auth/realms/idp/protocol/saml" />
+			<SingleLogoutService
+					Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+					Location="https://idp.test.com/auth/realms/idp/protocol/saml" />
+			<NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</NameIDFormat>
+			<NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</NameIDFormat>
+			<NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</NameIDFormat>
+			<NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>
+			<SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+				Location="https://idp.test.com/auth/realms/idp/protocol/saml" />
+			<SingleSignOnService
+				Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+				Location="https://idp.test.com/auth/realms/idp/protocol/saml" />
+			<SingleSignOnService
+				Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP"
+				Location="https://idp.test.com/auth/realms/idp/protocol/saml" />
+		</IDPSSODescriptor>
+	</EntityDescriptor>
+</EntitiesDescriptor>

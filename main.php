@@ -23,14 +23,13 @@ class CombodoSamlMenuHandler extends ModuleHandlerAPI
 		if ($bConfigMenuEnabled)
 		{
 			new WebPageMenuNode(
-				'ConfigGenerateSimpleSaml',
-				utils::GetAbsoluteUrlModulePage('combodo-saml', "generateconf.php"),
+				'SAMLConfiguration',
+				utils::GetAbsoluteUrlModulePage('combodo-saml', "configuration.php"),
 				ApplicationMenu::GetMenuIndexById('ConfigEditor'),
 				50 ,
 				'ResourceAdminMenu',
 				UR_ACTION_MODIFY,
 				UR_ALLOWED_YES,
-				null);
-		}
+				null);}
 	}
 }

@@ -16,5 +16,5 @@ Dict::Add('FR FR', 'French', 'Français', array(
 	'SAML:SimpleSaml:Instructions' => 'Ajouter ces lignes à la configuration: simplesamlphp/metadata/saml20-sp-remote.php',
     'SAML:Login:SignIn' => 'S\'identifier avec SAML',
     'SAML:Login:SignInTooltip' => 'Cliquer ici pour s\'identifier avec le serveur SAML',
-	'Menu:ConfigGenerateSimpleSaml' => 'Générer la configuration SimpleSaml',
+	'Menu:SAMLConfiguration' => 'Configuration SAML',
 ));
