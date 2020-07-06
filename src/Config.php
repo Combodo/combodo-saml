@@ -187,7 +187,7 @@ class Config
 	{
 		$sPath = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
 		$aSP = array(
-			'entityid' => utils::GetAbsoluteUrlModulePage('combodo-saml', 'generateconf.php'),
+			'entityid' => utils::GetAbsoluteUrlModulesRoot().'combodo-saml',
 			'SingleLogoutService' => array(
 				'Binding' => static::BINDING_HTTP_REDIRECT,
 				'Location' => $sPath.'/sls.php',
