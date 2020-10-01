@@ -50,6 +50,24 @@ $oSSO->setAttribute('Binding', $aSP['AssertionConsumerService']['Binding']);
 $oSSO->setAttribute('Location', $aSP['AssertionConsumerService']['Location']);
 $oSPSSODesc->appendChild($oSSO);
 
+if(isset($aSP['key']) && ($aSP['key'] != ''))
+{
+    $oKeyDescriptor = $doc->createElementNS(Config::META_DATA_NS, 'md:KeyDescriptor');
+    $oKeyDescriptor->setAttribute('use', 'signing');
+    $oSPSSODesc->appendChild($oKeyDescriptor);
+    
+    $oKeyInfo = $doc->createElementNS(Config::DIGITAL_SIGNATURE_NS, 'ds:KeyInfo');
+    $oKeyDescriptor->appendChild($oKeyInfo);
+    
+    $oX509Data = $doc->createElementNS(Config::DIGITAL_SIGNATURE_NS, 'ds:X509Data');
+    $oKeyInfo->appendChild($oX509Data);
+    
+    $oX509Cert = $doc->createElementNS(Config::DIGITAL_SIGNATURE_NS, 'ds:X509Certificate', $aSP['key']);
+    $oX509Data->appendChild($oX509Cert);
+    
+    //TODO ?? If we request encryption, then the KeyDescriptor node must be duplicated with the attribute use="encryption"
+}
+
 $oP = new ajax_page('');
 $oP->SetContentType('application/xml;charset=UTF-8');
 $oP->add($doc->saveXML());

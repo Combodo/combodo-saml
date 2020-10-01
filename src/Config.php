@@ -28,6 +28,7 @@ class Config
 	{
 		$aSP = MetaModel::GetModuleSetting('combodo-saml', 'sp', array());
 		$aIDP = MetaModel::GetModuleSetting('combodo-saml', 'idp', array());
+		$aSecurity = MetaModel::GetModuleSetting('combodo-saml', 'security', array());
 		$sEntityId = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
 
 		$aSettings = array (
@@ -51,6 +52,9 @@ class Config
 			
 			// Identity Provider Data that we want connected with our SP.
 			'idp' => $aIDP,
+		    
+			// Extra security configuration
+			'security' => $aSecurity,
 		);
 
 		if (!isset($aSettings['sp']['entityId']))
@@ -185,6 +189,7 @@ class Config
 	
 	public static function GetSPSettings()
 	{
+		$aConfSettings = static::GetSettings();
 		$sPath = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
 		$aSP = array(
 			'entityid' => utils::GetAbsoluteUrlModulesRoot().'combodo-saml',
@@ -197,6 +202,10 @@ class Config
 				'Location' => $sPath.'/acs.php',
 			),
 		);
+		if (isset($aConfSettings['sp']['x509cert']))
+		{
+		    $aSP['key'] = str_replace(array('-----END CERTIFICATE-----', '-----BEGIN CERTIFICATE-----', "\n", "\r"), '', $aConfSettings['sp']['x509cert']);
+		}
 		return $aSP;
 	}
 }
