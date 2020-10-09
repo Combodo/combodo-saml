@@ -17,4 +17,5 @@ Dict::Add('FR FR', 'French', 'Français', array(
     'SAML:Login:SignIn' => 'S\'identifier avec SAML',
     'SAML:Login:SignInTooltip' => 'Cliquer ici pour s\'identifier avec le serveur SAML',
 	'Menu:SAMLConfiguration' => 'Configuration SAML',
+	'SAML:Error:Invalid_Attribute' => 'L\'authentification SAML a échoué car l\'attribut attendu \'%1$s\' n\'est pas présent dans le réponse de l\'Identity Provider (IdP). Consultez le fichier error.log pour plus d\'informations.',
 ));

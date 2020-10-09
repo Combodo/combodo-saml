@@ -30,7 +30,7 @@ class Config
 		$aIDP = MetaModel::GetModuleSetting('combodo-saml', 'idp', array());
 		$aSecurity = MetaModel::GetModuleSetting('combodo-saml', 'security', array());
 		$sEntityId = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
-
+		
 		$aSettings = array (
 			// If 'strict' is True, then the PHP Toolkit will reject unsigned
 			// or unencrypted messages if it expects them to be signed or encrypted.
@@ -46,6 +46,13 @@ class Config
 			// Ex http://sp.example.com/
 			//    http://example.com/sp/
 			'baseurl' => MetaModel::GetModuleSetting('combodo-saml', 'baseurl', $sEntityId),
+			
+			// Which attribute do we use to get the login of the person identified by the IdP ?
+			'nameid' => MetaModel::GetModuleSetting('combodo-saml', 'nameid', ''),
+			
+			// Duration information for the validity of the meta data... (used for creating the XML meta data
+			'validUntil' => MetaModel::GetModuleSetting('combodo-saml', 'validUntil', null),
+			'cacheDuration' => MetaModel::GetModuleSetting('combodo-saml', 'cacheDuration', null),
 			
 			// Service Provider Data that we are deploying.
 			'sp' => $aSP,
@@ -192,7 +199,7 @@ class Config
 		$aConfSettings = static::GetSettings();
 		$sPath = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
 		$aSP = array(
-			'entityid' => utils::GetAbsoluteUrlModulesRoot().'combodo-saml',
+			'entityId' => utils::GetAbsoluteUrlModulesRoot().'combodo-saml',
 			'SingleLogoutService' => array(
 				'Binding' => static::BINDING_HTTP_REDIRECT,
 				'Location' => $sPath.'/sls.php',
@@ -205,6 +212,26 @@ class Config
 		if (isset($aConfSettings['sp']['x509cert']))
 		{
 		    $aSP['key'] = str_replace(array('-----END CERTIFICATE-----', '-----BEGIN CERTIFICATE-----', "\n", "\r"), '', $aConfSettings['sp']['x509cert']);
+		}
+		return $aSP;
+	}
+	
+	public static function FillSPSettings(&$aSP)
+	{
+		$aConfSettings = static::GetSettings();
+		$sPath = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
+		$aSP['entityId'] = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
+		$aSP['singleLogoutService'] = array(
+				'binding' => static::BINDING_HTTP_REDIRECT,
+				'url' => $sPath.'/sls.php',
+			);
+		$aSP['assertionConsumerService'] = array(
+				'binding' => static::BINDING_HTTP_POST,
+				'url' => $sPath.'/acs.php',
+			);
+		if (isset($aConfSettings['sp']['x509cert']))
+		{
+			//$aSP['key'] = str_replace(array('-----END CERTIFICATE-----', '-----BEGIN CERTIFICATE-----', "\n", "\r"), '', $aConfSettings['sp']['x509cert']);
 		}
 		return $aSP;
 	}

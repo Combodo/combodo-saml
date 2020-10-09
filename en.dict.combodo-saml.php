@@ -17,4 +17,5 @@ Dict::Add('EN US', 'English', 'English', array(
     'SAML:Login:SignIn' => 'Sign in with SAML',
     'SAML:Login:SignInTooltip' => 'Click here to authenticate yourself with the SAML server',
 	'Menu:SAMLConfiguration' => 'SAML Configuration',
+	'SAML:Error:Invalid_Attribute' => 'SAML authentication failed because the expected attribute \'%1$s\' was not found in the response from the Identity Provider (IdP). Check the error.log file for more information.',
 ));

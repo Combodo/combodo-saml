@@ -10,6 +10,8 @@ require_once (APPROOT.'application/startup.inc.php');
 
 use Combodo\iTop\Extension\Saml\Config;
 
+define('HIDDEN_PRIVATE_KEY', '*** private key no displayed ***');
+
 function DisplayInputForm(WebPage $oP, $sUrl, $sRawXml)
 {
 	$sSafeUrl = htmlentities($sUrl, ENT_QUOTES, 'UTF-8');
@@ -119,6 +121,10 @@ function UpdateIdPConfiguration(WebPage $oP, $sUrl, $sRawXml)
 			$oConf->SetAllowedLoginTypes($aModifiedLoginTypes);
 		}
 
+		if ($sUrl != '')
+		{
+			$oConf->SetModuleSetting('combodo-saml', 'idp_metadata_url', $sUrl);
+		}
 		$oConf->SetModuleSetting('combodo-saml', 'idp', $aIdP);
 		@chmod($oConf->GetLoadedFile(), 0770); // Allow overwriting the file
 		$oConf->WriteToFile();
@@ -172,54 +178,52 @@ function DisplayWelcomePage(WebPage $oP)
 	</ul>
 	<p>This configuration is done by echanging XML meta data between both systems.
 	You must export the meta data describing iTop as a Service provider to your SAML server in order to allow iTop to use the Identity Provider.
-	Similarly you must configure the Identity Provider to be used by iTop. This is achieved by importing the XML meta data published by your SAML server into iTop</p>
+	Similarly you must configure the Identity Provider to be used by iTop. This is achieved by importing the XML meta data published by your SAML server into iTop.</p>
 	<hr/>
 HTML
 	);
 
-	DisplayInputForm($oP, '', '');
+	$sUrl = MetaModel::GetModuleSetting('combodo-saml', 'idp_metadata_url','');
+	DisplayInputForm($oP, $sUrl, '');
 	
 	$aSettings = Config::GetSettings();
-	$sSafePrivateKey = isset($aSettings['sp']['private_key']) ? htmlentities($aSettings['sp']['private_key'], ENT_QUOTES, 'UTF-8') : '';
+	$sSafePrivateKey = (isset($aSettings['sp']['privateKey']) && ($aSettings['sp']['privateKey'] != '')) ? HIDDEN_PRIVATE_KEY : '';
 	$sSafeX509Cert = isset($aSettings['sp']['x509cert']) ? htmlentities($aSettings['sp']['x509cert'], ENT_QUOTES, 'UTF-8') : '';
-	$oP->add(
-<<<HTML
-	<hr/>
-	<form id="certificate_form" method="post">
-	<input type="hidden" name="operation" value="update_certificate"/>
-	<h2>Configuring the iTop Service Provider private key and certificate</h2>
-	<p>Enter the X509 certificate and the private key to use for signing iTop's SAML requests.</p>
-	<p>If you skip this configuration the requests from iTop to the Identity Provider will NOT be signed.</p>
-	<p>Private Key:</p>
-	<p><textarea style="width:30rem;height:10rem;" name="private_key" placeholder="-----BEGIN RSA PRIVATE KEY-----
-	...
-	...
-	...
-	-----END RSA PRIVATE KEY-----
-	">$sSafePrivateKey</textarea></p>
-	<p>X509 certificate:</p>
-	<p><textarea style="width:30rem;height:10rem;" name="x509cert" placeholder="-----BEGIN CERTIFICATE-----
-	...
-	...
-	...
-	-----END CERTIFICATE-----">$sSafeX509Cert</textarea></p>
-	<p><button type="submit">Save keys</button></p>
-	</form>
-HTML
-	    );
 	
+	$sSafeNameID = MetaModel::GetModuleSetting('combodo-saml', 'nameid', '');
 	$sMetaDataURI = utils::GetAbsoluteUrlModulePage('combodo-saml', "sp-metadata.php");
-	
 	$oP->add(
 <<<HTML
-	<hr/>
-	<h2>Exporting iTop's Service Provider meta data</h2>
-	<p>Use the following link to export iTop's meta data: <a target="_blank" href="$sMetaDataURI">Meta Data Export</a></p>
+<hr/>
+<form id="certificate_form" method="post">
+<input type="hidden" name="operation" value="update_certificate"/>
+<h2>Configuring the iTop Service Provider</h2>
+<p>NameID or attribute <i>in the IdP response</i> holding the login/identifier:</p>
+<p><input type="text" name="name_id" style="width: 10em" placeholder="uid" value="$sSafeNameID"/> (For example: NameID, uid, email...)</p>
+<p>Enter the X509 certificate and the private key to use for signing iTop's SAML requests. You can use <a href="https://www.samltool.com/self_signed_certs.php" target="_blank">this online tool</a> to generate a self-signed certificate.</p>
+<p>If you skip this configuration the requests will NOT be signed.</p>
+<p>Private Key:</p>
+<p><textarea style="width:35rem;height:10rem;" name="private_key" placeholder="-----BEGIN PRIVATE KEY-----
+...
+...
+...
+-----END PRIVATE KEY-----">$sSafePrivateKey</textarea></p>
+<p>X509 certificate:</p>
+<p><textarea style="width:35rem;height:10rem;" name="x509cert" placeholder="-----BEGIN CERTIFICATE-----
+...
+...
+...
+-----END CERTIFICATE-----">$sSafeX509Cert</textarea></p>
+<p><button type="submit">Save SP configuration</button></p>
+</form>
+
+<hr/>
+
+<h2>Exporting iTop's Service Provider meta data</h2>
+<p>Use the following link to export iTop's meta data: <a target="_blank" href="$sMetaDataURI">Meta Data Export</a></p>
+<p>&nbsp;</p>
 HTML
 	);
-	$oP->StartCollapsibleSection('PHP Version, specific for SimpleSAML', false, 'php-meta-data');
-	DisplaySPMetaDataAsPHP($oP);
-	$oP->EndCollapsibleSection();
 }
 
 /**
@@ -230,20 +234,26 @@ HTML
 function UpdateCertificate(WebPage $oP)
 {
 	$oConf = Metamodel::GetConfig();
+	$sNameID = utils::ReadPostedParam('name_id', '', false, 'raw_data');
 	$sX509Cert = utils::ReadPostedParam('x509cert', '', false, 'raw_data');
 	$sPrivateKey = utils::ReadPostedParam('private_key', '', false, 'raw_data');
+	
+	$oConf->SetModuleSetting('combodo-saml', 'nameid', $sNameID);
 
 	$aSP = $oConf->GetModuleSetting('combodo-saml', 'sp', array());
 	$aSP['entityId'] = utils::GetAbsoluteUrlModulesRoot() . 'combodo-saml';
 	$aSP['x509cert'] = $sX509Cert;
-	$aSP['private_key'] = $sPrivateKey;
+	if ($sPrivateKey !== HIDDEN_PRIVATE_KEY)
+	{
+		$aSP['privateKey'] = $sPrivateKey;
+	}
 	$oConf->SetModuleSetting('combodo-saml', 'sp', $aSP);
 
 	$aSecurity = $oConf->GetModuleSetting('combodo-saml', 'security', array());
 	if ($sX509Cert != '')
 	{
-		// When a certificate is configured, request that the messages be signed
-		$aSecurity['wantMessagesSigned'] = true;
+		// When a certificate is configured, request that the assertions be signed
+		$aSecurity['wantMessagesSigned'] = false; // Forcing this to true seems to cause the logoff to fail with SimpleSAML since the client expects ALL messages to be signed
 		$aSecurity['wantAssertionsSigned'] = true;
 		$aSecurity['authnRequestsSigned'] = true;
 		$aSecurity['logoutRequestSigned'] = true;
@@ -266,20 +276,6 @@ function UpdateCertificate(WebPage $oP)
 
 	$oP->add('<div class="header_message message_ok">iTop (Service Provider) Configuration updated!!</div>');
 	DisplayWelcomePage($oP);
-}
-
-function DisplaySPMetaDataAsPHP(WebPage $oP)
-{
-	$aSP = Config::GetSPSettings();
-
-	$sEntityId = $aSP['entityid'];
-
-	$sSimpleSamlConf = '$aMetadata["' . $sEntityId . '"] = ' . var_export($aSP, true);
-
-	$oP->p(Dict::S('SAML:SimpleSaml:Instructions'));
-	$oP->add('<textarea style="width:100%;display:block;height:35em;">');
-	$oP->add($sSimpleSamlConf);
-	$oP->add("</textarea>");
 }
 
 /////////////////////////////////////////////////////////////////////

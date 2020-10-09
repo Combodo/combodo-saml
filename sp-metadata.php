@@ -26,49 +26,43 @@ require_once (APPROOT.'application/startup.inc.php');
 require_once (APPROOT.'application/ajaxwebpage.class.inc.php');
 
 use Combodo\iTop\Extension\Saml\Config;
-
-$aSP = Config::GetSPSettings();
-
-$doc  = new DOMDocument('1.0', 'utf-8');
-$doc->formatOutput = true;
-$root = $doc->createElementNS(Config::META_DATA_NS, 'md:EntityDescriptor');
-$root->setAttribute('entityID', $aSP['entityid']);
-$doc->appendChild($root);
-
-$oSPSSODesc = $doc->createElementNS(Config::META_DATA_NS, 'md:SPSSODescriptor');
-$oSPSSODesc->setAttribute('protocolSupportEnumeration', 'urn:oasis:names:tc:SAML:2.0:protocol');
-$root->appendChild($oSPSSODesc);
-
-$oSLO = $doc->createElementNS(Config::META_DATA_NS, 'md:SingleLogoutService');
-$oSLO->setAttribute('Binding', $aSP['SingleLogoutService']['Binding']);
-$oSLO->setAttribute('Location', $aSP['SingleLogoutService']['Location']);
-$oSPSSODesc->appendChild($oSLO);
-
-$oSSO = $doc->createElementNS(Config::META_DATA_NS, 'md:AssertionConsumerService');
-$oSSO->setAttribute('index', '1');
-$oSSO->setAttribute('Binding', $aSP['AssertionConsumerService']['Binding']);
-$oSSO->setAttribute('Location', $aSP['AssertionConsumerService']['Location']);
-$oSPSSODesc->appendChild($oSSO);
-
-if(isset($aSP['key']) && ($aSP['key'] != ''))
-{
-    $oKeyDescriptor = $doc->createElementNS(Config::META_DATA_NS, 'md:KeyDescriptor');
-    $oKeyDescriptor->setAttribute('use', 'signing');
-    $oSPSSODesc->appendChild($oKeyDescriptor);
-    
-    $oKeyInfo = $doc->createElementNS(Config::DIGITAL_SIGNATURE_NS, 'ds:KeyInfo');
-    $oKeyDescriptor->appendChild($oKeyInfo);
-    
-    $oX509Data = $doc->createElementNS(Config::DIGITAL_SIGNATURE_NS, 'ds:X509Data');
-    $oKeyInfo->appendChild($oX509Data);
-    
-    $oX509Cert = $doc->createElementNS(Config::DIGITAL_SIGNATURE_NS, 'ds:X509Certificate', $aSP['key']);
-    $oX509Data->appendChild($oX509Cert);
-    
-    //TODO ?? If we request encryption, then the KeyDescriptor node must be duplicated with the attribute use="encryption"
-}
+use OneLogin\Saml2\Metadata;
 
 $oP = new ajax_page('');
 $oP->SetContentType('application/xml;charset=UTF-8');
-$oP->add($doc->saveXML());
+
+$aSettings = Config::GetSettings();
+// Automatically fill-in the URLs
+Config::FillSPSettings($aSettings['sp']);
+
+$aAttributes = isset($aSettings['sp']['attributeConsumingService']) ? $aSettings['sp']['attributeConsumingService'] : array();
+$aContactPerson = isset($aSettings['contactPerson']) ? $aSettings['contactPerson'] : array();
+$aOrganization = isset($aSettings['organization']) ? $aSettings['organization'] : array();
+
+$bWantMessagesSigned = isset($aSettings['security']['wantMessagesSigned']) ? $aSettings['security']['wantMessagesSigned'] :  true;
+$bWantAssertionsSigned = isset($aSettings['security']['wantAssertionsSigned']) ? $aSettings['security']['wantAssertionsSigned'] :  true;
+
+$validUntil = MetaModel::GetModuleSetting('combodo-saml', 'validUntil', null);
+if ($validUntil !== null)
+{
+	// Convert from days (relative to the current time) to seconds
+	$validUntil = (int)(time()+(24*3600)*$validUntil);
+}
+$cacheDuration = MetaModel::GetModuleSetting('combodo-saml', 'cacheDuration', null);
+if ($cacheDuration !== null)
+{
+	// Convert from days to seconds
+	$cacheDuration = (int)((24*3600)*$cacheDuration);
+}
+
+
+$sXml = MetaData::builder($aSettings['sp'], $bWantMessagesSigned, $bWantAssertionsSigned, $validUntil, $cacheDuration, $aContactPerson, $aOrganization, $aAttributes);
+if (isset($aSettings['sp']['x509cert']) && isset($aSettings['sp']['privateKey']) && ($aSettings['sp']['x509cert'] != '') && ($aSettings['sp']['privateKey'] != ''))
+{
+	// If a private key and a certificate are specified, add them to the metadata and sign the metadata
+	$sXml = MetaData::addX509KeyDescriptors($sXml, $aSettings['sp']['x509cert']);
+	$sXml = MetaData::signMetadata($sXml, $aSettings['sp']['privateKey'], $aSettings['sp']['x509cert']);
+}
+
+$oP->add($sXml);
 $oP->output();

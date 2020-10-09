@@ -31,7 +31,33 @@ if (!$oAuth->isAuthenticated()) {
 }
 
 $aUserAttributes = $oAuth->getAttributes();
-$_SESSION['auth_user'] = $aUserAttributes['uid'][0];
+$sNameId = MetaModel::GetModuleSetting('combodo-saml', 'nameid', 'uid');
+if ($sNameId == '')
+{
+	// Enforce a default / non-empty value in case the conf gets garbled
+	$sNameId = 'uid';
+}
+
+if (strcasecmp($sNameId, 'nameid') == 0)
+{
+	$sLogin = $oAuth->getNameId();
+}
+else
+{
+	if (!array_key_exists($sNameId, $aUserAttributes))
+	{
+		echo "<p>".Dict::Format('SAML:Error:Invalid_Attribute', $sNameId)."</p>";
+		IssueLog::Error("SAML authentication failed because the expected attribute '$sNameId' was not found in the IdP response.");
+		IssueLog::Info('Adjust the parameter "nameid" of the module "combodo-saml" in the iTop configuration file to specify a valid attribute or specify "NameID" to use the "subject" of the SAML response as the login.');
+		IssueLog::Info('IdP reponse subject contains '.$oAuth->getNameId());
+		IssueLog::Info('Available attributes in the IdP response: '.print_r($aUserAttributes, true));
+		unset($_SESSION['login_mode']);
+		unset($_SESSION['login_will_redirect']);
+		exit;
+	}
+	$sLogin = $aUserAttributes[$sNameId][0];
+}
+$_SESSION['auth_user'] = $sLogin;
 $_SESSION['login_mode'] = 'saml';
 unset($_SESSION['login_will_redirect']);
 
