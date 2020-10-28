@@ -28,16 +28,16 @@ function DisplayInputForm(WebPage $oP, $sUrl, $sRawXml)
 	$oP->add(
 <<<HTML
 	    <p><textarea name="xml_meta_data" style="width: 30rem; height:10rem;">$sSafeXml</textarea></p>
-	HTML
-	    );
+HTML
+	);
 	$oP->EndCollapsibleSection();
 	$oP->add(
 <<<HTML
 		<p><button type="submit">Check Meta Data</button></p>
 		<input type="hidden" name="operation" value="check"/>
 	</form>
-	HTML
-	    );
+HTML
+	);
 	
 }
 
