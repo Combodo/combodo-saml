@@ -189,15 +189,19 @@ HTML
 	$aSettings = Config::GetSettings();
 	$sSafePrivateKey = (isset($aSettings['sp']['privateKey']) && ($aSettings['sp']['privateKey'] != '')) ? HIDDEN_PRIVATE_KEY : '';
 	$sSafeX509Cert = isset($aSettings['sp']['x509cert']) ? htmlentities($aSettings['sp']['x509cert'], ENT_QUOTES, 'UTF-8') : '';
+
+	$bDebug = isset($aSettings['debug']) ? (bool)$aSettings['debug'] : true;
 	
 	$sSafeNameID = MetaModel::GetModuleSetting('combodo-saml', 'nameid', '');
 	$sMetaDataURI = utils::GetAbsoluteUrlModulePage('combodo-saml', "sp-metadata.php");
+	$sDebugChecked = $bDebug ? 'checked' : '';
 	$oP->add(
 <<<HTML
 <hr/>
 <form id="certificate_form" method="post">
 <input type="hidden" name="operation" value="update_certificate"/>
 <h2>Configuring the iTop Service Provider</h2>
+<p><input type="checkbox" name="debug" $sDebugChecked value="1" id="debug_checkbox"><label for="debug_checkbox"> Debug mode (more debug information logged to the file <i>log/saml.log</i>, <b>not recommended</b> in production.)</label</p>
 <p>NameID or attribute <i>in the IdP response</i> holding the login/identifier:</p>
 <p><input type="text" name="name_id" style="width: 10em" placeholder="uid" value="$sSafeNameID"/> (For example: NameID, uid, email...)</p>
 <p>Enter the X509 certificate and the private key to use for signing iTop's SAML requests. You can use <a href="https://www.samltool.com/self_signed_certs.php" target="_blank">this online tool</a> to generate a self-signed certificate.</p>
@@ -234,12 +238,14 @@ HTML
 function UpdateCertificate(WebPage $oP)
 {
 	$oConf = Metamodel::GetConfig();
-	$sNameID = utils::ReadPostedParam('name_id', '', false, 'raw_data');
+	$bDebug = (bool)utils::ReadPostedParam('debug', '', false, 'raw_data');
+	$sNameID = utils::ReadPostedParam('name_id', 0, false, 'raw_data');
 	$sX509Cert = utils::ReadPostedParam('x509cert', '', false, 'raw_data');
 	$sPrivateKey = utils::ReadPostedParam('private_key', '', false, 'raw_data');
 	
 	$oConf->SetModuleSetting('combodo-saml', 'nameid', $sNameID);
-
+	$oConf->SetModuleSetting('combodo-saml', 'debug', $bDebug);
+	
 	$aSP = $oConf->GetModuleSetting('combodo-saml', 'sp', array());
 	$aSP['entityId'] = utils::GetAbsoluteUrlModulesRoot() . 'combodo-saml';
 	$aSP['x509cert'] = $sX509Cert;

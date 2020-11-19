@@ -8,6 +8,7 @@
 namespace Combodo\iTop\Extension\Saml;
 
 use AbstractLoginFSMExtension;
+use MetaModel;
 use Dict;
 use iLoginUIExtension;
 use iLogoutExtension;
@@ -60,6 +61,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 					// If the found URL does not start with the configured AppRoot URL
 					$sOriginURL = utils::GetAbsoluteUrlAppRoot().'pages/UI.php';
 				}
+				Logger::Debug("Login($sOriginURL)");
 				$oAuth->login($sOriginURL); // Will redirect and exit
 			}
 		}
@@ -72,6 +74,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 		{
             if (!isset($_SESSION['auth_user']))
             {
+            	Logger::Debug("OnCheckCredentials: Wrong credentials!");
                 $iErrorCode = LoginWebPage::EXIT_CODE_WRONGCREDENTIALS;
                 return LoginWebPage::LOGIN_FSM_ERROR;
             }
@@ -86,9 +89,11 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 			$sAuthUser = $_SESSION['auth_user'];
             if (!LoginWebPage::CheckUser($sAuthUser))
             {
+            	Logger::Debug("OnCredentialsOK: User ($sAuthUser) Not Authorized!");
                 $iErrorCode = LoginWebPage::EXIT_CODE_NOTAUTHORIZED;
                 return LoginWebPage::LOGIN_FSM_ERROR;
             }
+            Logger::Debug("Successfully logged in (user = '$sAuthUser')");
 			LoginWebPage::OnLoginSuccess($sAuthUser, 'external', $_SESSION['login_mode']);
 		}
 		return LoginWebPage::LOGIN_FSM_CONTINUE;
@@ -100,6 +105,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 		{
 			if ($iErrorCode != LoginWebPage::EXIT_CODE_MISSINGLOGIN)
 			{
+				Logger::Debug("OnError: User not allowed!");
 				$oLoginWebPage = new LoginWebPage();
 				$oLoginWebPage->DisplayLogoutPage(false, Dict::S('SAML:Error:UserNotAllowed'));
                 exit();
@@ -125,6 +131,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 	{
 		$oConfig = new Config();
 		$oAuth = new Auth($oConfig->GetSettings());
+		Logger::Debug("Logout(".utils::GetAbsoluteUrlAppRoot().'pages/UI.php'.")");
 		$oAuth->logout(utils::GetAbsoluteUrlAppRoot().'pages/UI.php'); // Will redirect and exit
 	}
 
@@ -137,8 +144,11 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
         $oLoginContext = new LoginTwigContext();
 	    $oLoginContext->SetLoaderPath(utils::GetAbsoluteModulePath('combodo-saml').'view');
 
+	    $sDefaultSamlLogo = utils::GetAbsoluteUrlModulesRoot().'combodo-saml/view/saml.png';
+	    $sLogoUrl = MetaModel::GetModuleSetting('combodo-saml', 'saml_logo_url', $sDefaultSamlLogo);
+	    
         $aData = array(
-            'sImagePath' => utils::GetAbsoluteUrlModulesRoot().'combodo-saml/view/saml.png',
+        	'sImagePath' => $sLogoUrl,
             'sLoginMode' => 'saml',
             'sLabel' => Dict::S('SAML:Login:SignIn'),
             'sTooltip' => Dict::S('SAML:Login:SignInTooltip'),

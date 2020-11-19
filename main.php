@@ -5,6 +5,7 @@
  *
  */
 require_once __DIR__.'/src/Config.php';
+require_once __DIR__.'/src/Logger.php';
 require_once __DIR__.'/src/SAMLLoginExtension.php';
 require_once __DIR__.'/vendor/autoload.php';
 

@@ -11,6 +11,7 @@
 Dict::Add('EN US', 'English', 'English', array(
 	'SAML:Error:UserNotAllowed' => 'User not allowed',
 	'SAML:Error:ErrorOccurred' => 'An error occurred',
+	'SAML:Error:CheckTheLogFileForMoreInformation' => 'Check the log file "log/saml.log" for more information.',
 	'SAML:Error:NotAuthenticated' => 'Not authenticated',
 	'SAML:SimpleSaml:GenerateSimpleSamlConf' => 'Generate configuration for SimpleSaml',
 	'SAML:SimpleSaml:Instructions' => 'Append this conf to: simplesamlphp/metadata/saml20-sp-remote.php',

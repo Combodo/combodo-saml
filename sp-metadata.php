@@ -27,6 +27,7 @@ require_once (APPROOT.'application/ajaxwebpage.class.inc.php');
 
 use Combodo\iTop\Extension\Saml\Config;
 use OneLogin\Saml2\Metadata;
+use OneLogin\Saml2\Settings;
 
 $oP = new ajax_page('');
 $oP->SetContentType('application/xml;charset=UTF-8');
@@ -55,8 +56,10 @@ if ($cacheDuration !== null)
 	$cacheDuration = (int)((24*3600)*$cacheDuration);
 }
 
+$oSettings = new Settings($aSettings); // Will fill default values for missing fields
+$aSP = $oSettings->getSPData();
 
-$sXml = MetaData::builder($aSettings['sp'], $bWantMessagesSigned, $bWantAssertionsSigned, $validUntil, $cacheDuration, $aContactPerson, $aOrganization, $aAttributes);
+$sXml = MetaData::builder($aSP, $bWantMessagesSigned, $bWantAssertionsSigned, $validUntil, $cacheDuration, $aContactPerson, $aOrganization, $aAttributes);
 if (isset($aSettings['sp']['x509cert']) && isset($aSettings['sp']['privateKey']) && ($aSettings['sp']['x509cert'] != '') && ($aSettings['sp']['privateKey'] != ''))
 {
 	// If a private key and a certificate are specified, add them to the metadata and sign the metadata

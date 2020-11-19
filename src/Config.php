@@ -54,6 +54,10 @@ class Config
 			'validUntil' => MetaModel::GetModuleSetting('combodo-saml', 'validUntil', null),
 			'cacheDuration' => MetaModel::GetModuleSetting('combodo-saml', 'cacheDuration', null),
 			
+			// Hack for processing some Logout reponses which differ (uppercase vs lowercase ?) in the encoding/signature
+			// Set to true for compatibility with ADFS / Azure
+			'retrieveParametersFromServer' => MetaModel::GetModuleSetting('combodo-saml', 'retrieveParametersFromServer', true),
+			
 			// Service Provider Data that we are deploying.
 			'sp' => $aSP,
 			

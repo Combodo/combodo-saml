@@ -7,6 +7,7 @@
 /**
  *  SP Single Logout Service Endpoint
  */
+use Combodo\iTop\Extension\Saml\Logger;
 
 require_once('../../approot.inc.php');
 require_once (APPROOT.'bootstrap.inc.php');
@@ -18,12 +19,16 @@ $oAuth = new OneLogin\Saml2\Auth($oConfig->GetSettings());
 unset($_SESSION['auth_user']);
 unset($_SESSION['login_mode']);
 
-$oAuth->processSLO();
+$bRetrieveParametersFromServer = MetaModel::GetModuleSetting('combodo-saml', 'retrieveParametersFromServer', true);
+Logger::Debug("Processing Logout Response (bRetrieveParametersFromServer = $bRetrieveParametersFromServer)");
+
+$oAuth->processSLO(false, null, $bRetrieveParametersFromServer);
 
 $aErrors = $oAuth->getErrors();
 
 if (empty($aErrors))
 {
+	Logger::Debug('Logout Response Ok.');
 	$oPage = LoginWebPage::NewLoginWebPage();
 	$oPage->DisplayLogoutPage(false);
 	exit;
@@ -31,5 +36,7 @@ if (empty($aErrors))
 else
 {
 	echo '<p>'.Dict::S('SAML:Error:ErrorOccurred').'</p>';
-	echo implode(', ', $aErrors);
+	echo '<p>'.Dict::S('SAML:Error:CheckTheLogFileForMoreInformation').'</p>';
+	Logger::Error("An error occured while processing the logout message: ".implode("\n", $aErrors));
+	Logger::Error('Last error reason: '.$oAuth->getLastErrorReason());
 }
