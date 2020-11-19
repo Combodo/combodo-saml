@@ -21,7 +21,7 @@ function DisplayInputForm(WebPage $oP, $sUrl, $sRawXml)
 	<form method="post">
 	<p>Enter the URL of the meta data from the Identity Provider (IdP):</p>
 	<p><input type="text" size="50" name="url" placeholder="https://my-idp-server/metadata" value="$sSafeUrl"></input></p>
-	HTML
+HTML
 	);
 	$oP->StartCollapsibleSection('Paste the XML meta data:', false, 'xml_direct_input');
 	$sSafeXml = htmlentities($sRawXml, ENT_QUOTES, 'UTF-8');
