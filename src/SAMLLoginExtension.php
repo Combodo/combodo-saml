@@ -87,13 +87,15 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 		if ($_SESSION['login_mode'] == 'saml')
 		{
 			$sAuthUser = $_SESSION['auth_user'];
-            if (!LoginWebPage::CheckUser($sAuthUser))
-            {
-            	Logger::Debug("OnCredentialsOK: User ($sAuthUser) Not Authorized!");
-                $iErrorCode = LoginWebPage::EXIT_CODE_NOTAUTHORIZED;
-                return LoginWebPage::LOGIN_FSM_ERROR;
-            }
-            Logger::Debug("Successfully logged in (user = '$sAuthUser')");
+			if (!LoginWebPage::CheckUser($sAuthUser))
+			{
+				Logger::Debug("OnCredentialsOK: User ($sAuthUser) Not Authorized!");
+				$iErrorCode = LoginWebPage::EXIT_CODE_NOTAUTHORIZED;
+				return LoginWebPage::LOGIN_FSM_ERROR;
+			}
+			Logger::Debug("Successfully logged in (user = '$sAuthUser')");
+			// See the note in LogoutAction below
+			$_SESSION['saml_auth_user_for_logout'] = $sAuthUser;
 			LoginWebPage::OnLoginSuccess($sAuthUser, 'external', $_SESSION['login_mode']);
 		}
 		return LoginWebPage::LOGIN_FSM_CONTINUE;
@@ -131,8 +133,14 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 	{
 		$oConfig = new Config();
 		$oAuth = new Auth($oConfig->GetSettings());
-		Logger::Debug("Logout(".utils::GetAbsoluteUrlAppRoot().'pages/UI.php'.")");
-		$oAuth->logout(utils::GetAbsoluteUrlAppRoot().'pages/UI.php'); // Will redirect and exit
+		// Note: under **some ADFS configurations** we must pass the user to the logout action
+		// since at this point in the code the session has been cleaned of the auth_user entry
+		// and UserRights::GetUser() returns an empty string as well, we use a custom session key
+		// to remember which user was authenticated with SAML...
+		$sLogin = $_SESSION['saml_auth_user_for_logout'];
+		unset($_SESSION['saml_auth_user_for_logout']);
+		Logger::Debug("Logout(".utils::GetAbsoluteUrlAppRoot().'pages/UI.php'.", array(), '$sLogin')");
+		$oAuth->logout(utils::GetAbsoluteUrlAppRoot().'pages/UI.php', array(), $sLogin); // Will redirect and exit
 	}
 
     /**
