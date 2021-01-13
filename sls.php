@@ -22,6 +22,12 @@ unset($_SESSION['login_mode']);
 $bRetrieveParametersFromServer = MetaModel::GetModuleSetting('combodo-saml', 'retrieveParametersFromServer', true);
 Logger::Debug("Processing Logout Response (bRetrieveParametersFromServer = $bRetrieveParametersFromServer)");
 
+if (isset($_GET['SAMLResponse'])) {
+    Logger::Trace(sprintf("GET SAMLResponse is:\n%s", $_GET['SAMLResponse']));
+} else {
+    Logger::Trace(sprintf("GET SAMLResponse is empty"));
+}
+
 $oAuth->processSLO(false, null, $bRetrieveParametersFromServer);
 
 $aErrors = $oAuth->getErrors();

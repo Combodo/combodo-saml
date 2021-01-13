@@ -18,6 +18,12 @@ $oConfig = new Combodo\iTop\Extension\Saml\Config();
 $oAuth = new OneLogin\Saml2\Auth($oConfig->GetSettings());
 
 Logger::Debug('Processing Login Response');
+if (isset($_POST['SAMLResponse'])) {
+    Logger::Trace(sprintf("POST SAMLResponse is:\n%s", $_POST['SAMLResponse']));
+} else {
+    Logger::Trace(sprintf("POST SAMLResponse is empty"));
+}
+
 $oAuth->processResponse();
 
 $aErrors = $oAuth->getErrors();

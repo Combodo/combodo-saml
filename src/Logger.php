@@ -17,21 +17,34 @@ class Logger
 	const WARNING = 'Warning';
 	const INFO = 'Info';
 	const DEBUG = 'Debug';
-	
-	private static $bDebug = null; 
-	
-	private static function Log($sLogLevel, $sMessage)
+	const TRACE = 'Trace';
+
+    private static $bDebug = null;
+    private static $bTrace = null;
+
+    private static function Log($sLogLevel, $sMessage)
 	{
-		if (static::$bDebug === null)
-		{
+		if (static::$bDebug === null) {
 			static::$bDebug = MetaModel::GetModuleSetting('combodo-saml', 'debug', true);
 		}
 		
-		if ((!static::$bDebug) && ($sLogLevel != static::ERROR))
-		{
+		if ((!static::$bDebug) && ($sLogLevel != static::ERROR)) {
 			// If not in debug mode, log only ERROR messages
 			return;
 		}
+
+		if ($sLogLevel == static::TRACE) {
+            if (static::$bTrace === null) {
+                // contrary to the other level of logging, the traces can leak sensible information, do not keep them enabled
+                // this is why they are not enabled like the other one by the 'debug' setting.
+                static::$bTrace = MetaModel::GetModuleSetting('combodo-saml', 'trace', true);
+            }
+            if (!static::$bTrace) {
+
+                return;
+            }
+        }
+
 		
 		$sLogFile = APPROOT.'/log/saml.log';
 		
@@ -72,4 +85,9 @@ class Logger
 	{
 		static::Log(static::DEBUG, $sMessage);
 	}
+
+    public static function Trace($sMessage)
+    {
+        static::Log(static::TRACE, $sMessage);
+    }
 }
