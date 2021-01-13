@@ -37,7 +37,7 @@ class Logger
             if (static::$bTrace === null) {
                 // contrary to the other level of logging, the traces can leak sensible information, do not keep them enabled
                 // this is why they are not enabled like the other one by the 'debug' setting.
-                static::$bTrace = MetaModel::GetModuleSetting('combodo-saml', 'trace', true);
+                static::$bTrace = MetaModel::GetModuleSetting('combodo-saml', 'trace', false);
             }
             if (!static::$bTrace) {
 
