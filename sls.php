@@ -23,7 +23,8 @@ $bRetrieveParametersFromServer = MetaModel::GetModuleSetting('combodo-saml', 're
 Logger::Debug("Processing Logout Response (bRetrieveParametersFromServer = $bRetrieveParametersFromServer)");
 
 if (isset($_GET['SAMLResponse'])) {
-    Logger::Trace(sprintf("GET SAMLResponse is:\n%s", $_GET['SAMLResponse']));
+    $sSAMLResponse = base64_decode($_GET['SAMLResponse']) ?: $_GET['SAMLResponse'];
+    Logger::Trace(sprintf("GET SAMLResponse is:\n%s", $sSAMLResponse));
 } else {
     Logger::Trace(sprintf("GET SAMLResponse is empty"));
 }
