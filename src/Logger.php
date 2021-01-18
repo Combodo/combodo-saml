@@ -11,83 +11,79 @@ use MetaModel;
 /**
  *  Simple logger to write to log/saml.log
  */
-class Logger
+class Logger extends \LogAPI
 {
-	const ERROR = 'Error';
-	const WARNING = 'Warning';
-	const INFO = 'Info';
-	const DEBUG = 'Debug';
-	const TRACE = 'Trace';
+    const CHANNEL_DEFAULT   = 'combodoSaml';
 
-    private static $bDebug = null;
-    private static $bTrace = null;
+    protected static $m_oFileLog = null;
 
-    private static function Log($sLogLevel, $sMessage)
-	{
-		if (static::$bDebug === null) {
-			static::$bDebug = MetaModel::GetModuleSetting('combodo-saml', 'debug', true);
-		}
-		
-		if ((!static::$bDebug) && ($sLogLevel != static::ERROR)) {
-			// If not in debug mode, log only ERROR messages
-			return;
-		}
-
-		if ($sLogLevel == static::TRACE) {
-            if (static::$bTrace === null) {
-                // contrary to the other level of logging, the traces can leak sensible information, do not keep them enabled
-                // this is why they are not enabled like the other one by the 'debug' setting.
-                static::$bTrace = MetaModel::GetModuleSetting('combodo-saml', 'trace', false);
-            }
-            if (!static::$bTrace) {
-
-                return;
-            }
+    public static function Enable($sTargetFile = null)
+    {
+        if (empty($sTargetFile))
+        {
+            $sTargetFile = APPROOT.'log/saml.log';
         }
 
-		
-		$sLogFile = APPROOT.'/log/saml.log';
-		
-		$hLogFile = fopen($sLogFile, 'a');
-		if ($hLogFile !== false)
-		{
-			flock($hLogFile, LOCK_EX);
-			$sDate = date('Y-m-d H:i:s');
-			fwrite($hLogFile, "$sDate | $sLogLevel | $sMessage\n");
-			fflush($hLogFile);
-			flock($hLogFile, LOCK_UN);
-			fclose($hLogFile);
-		}
-		else
-		{
-			IssueLog::Error("Cannot open log file '$sLogFile' for writing.");
-			IssueLog::Info($sMessage);
-		}
-	}
-	
-	public static function Error($sMessage)
-	{
-		static::Log(static::ERROR, $sMessage);
-	}
+        self::legacyConfHandler();
 
-	
-	public static function Warning($sMessage)
-	{
-		static::Log(static::WARNING, $sMessage);
-	}
-	
-	public static function Info($sMessage)
-	{
-		static::Log(static::INFO, $sMessage);
-	}
-	
-	public static function Debug($sMessage)
-	{
-		static::Log(static::DEBUG, $sMessage);
-	}
+        parent::Enable($sTargetFile);
+    }
 
-    public static function Trace($sMessage)
+    public static function Log($sLevel, $sMessage, $sChannel = null, $aContext = array())
     {
-        static::Log(static::TRACE, $sMessage);
+        if (! static::$m_oFileLog) {
+            self::Enable();
+        }
+
+        parent::Log($sLevel, $sMessage, $sChannel, $aContext);
+    }
+
+    private static function legacyConfHandler()
+    {
+        if (static::$m_oFileLog) {
+            return;
+        }
+
+        $oConfig = (static::$m_oMockMetaModelConfig !== null) ? static::$m_oMockMetaModelConfig :  \MetaModel::GetConfig();
+        if (!$oConfig instanceof Config)
+        {
+            return;
+        }
+
+        $deprecatedSettingValue = static::$bDebug = MetaModel::GetModuleSetting('combodo-saml', 'debug', null);
+        if ($deprecatedSettingValue !== false) {
+            //we only handle the legacy behavior of when the loggin was disabled it did still log errors.
+            return;
+        }
+
+        $sLogLevelMin = $oConfig->Get('log_level_min');
+
+//        if (isset($sLogLevelMin[static::CHANNEL_DEFAULT]) && $deprecatedSettingValue == null)
+//        {
+//            //This is the nominal case
+//            return;
+//        }
+
+        if (
+            (false == $deprecatedSettingValue) &&
+            (
+                (!isset($sLogLevelMin[static::CHANNEL_DEFAULT]))
+                ||
+                (static::LEVEL_ERROR != $sLogLevelMin[static::CHANNEL_DEFAULT])
+            )
+        )
+        {
+            //the legacy code was filtering out the log below Error  of the legacy setting was false
+            \IssueLog::Warning('The config "debug" for module "combodo-saml" is deprecated, you should use the "log_level_min" for the channel "'.self::CHANNEL_DEFAULT.'" instead.');
+            $sLogLevelMin[static::CHANNEL_DEFAULT] = static::LEVEL_ERROR;
+            $oConfig->Set('log_level_min', $sLogLevelMin);
+            return;
+        }
+
+//        if (! isset($sLogLevelMin[static::CHANNEL_DEFAULT]) && $deprecatedSettingValue != false)
+//        {
+//            //Per default, the legacy code was allowing the debug level, this is not the standard behavior, but, well, we choose to be futur proof and do not hjandle this speicficity
+//            return;
+//        }
     }
 }
