@@ -24,9 +24,9 @@ Logger::Debug("Processing Logout Response (bRetrieveParametersFromServer = $bRet
 
 if (isset($_GET['SAMLResponse'])) {
     $sSAMLResponse = base64_decode($_GET['SAMLResponse']) ?: $_GET['SAMLResponse'];
-    Logger::Trace(sprintf("GET SAMLResponse is:\n%s", $sSAMLResponse));
+    Logger::Debug(sprintf("GET SAMLResponse is:\n%s", $sSAMLResponse));
 } else {
-    Logger::Trace(sprintf("GET SAMLResponse is empty"));
+    Logger::Debug(sprintf("GET SAMLResponse is empty"));
 }
 
 $oAuth->processSLO(false, null, $bRetrieveParametersFromServer);

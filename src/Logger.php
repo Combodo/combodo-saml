@@ -11,28 +11,65 @@ use MetaModel;
 /**
  *  Simple logger to write to log/saml.log
  */
-class Logger extends \LogAPI
+class Logger
 {
-    const CHANNEL_DEFAULT   = 'combodoSaml';
+    const ERROR = 'Error';
+    const WARNING = 'Warning';
+    const INFO = 'Info';
+    const DEBUG = 'Debug';
 
-    protected static $m_oFileLog = null;
+    private static $bDebug = null;
 
-    public static function Enable($sTargetFile = null)
+    private static function Log($sLogLevel, $sMessage)
     {
-        if (empty($sTargetFile))
+        if (static::$bDebug === null)
         {
-            $sTargetFile = APPROOT.'log/saml.log';
+            static::$bDebug = MetaModel::GetModuleSetting('combodo-saml', 'debug', true);
         }
 
-        parent::Enable($sTargetFile);
+        if ((!static::$bDebug) && ($sLogLevel != static::ERROR))
+        {
+            // If not in debug mode, log only ERROR messages
+            return;
+        }
+
+        $sLogFile = APPROOT.'/log/saml.log';
+
+        $hLogFile = fopen($sLogFile, 'a');
+        if ($hLogFile !== false)
+        {
+            flock($hLogFile, LOCK_EX);
+            $sDate = date('Y-m-d H:i:s');
+            fwrite($hLogFile, "$sDate | $sLogLevel | $sMessage\n");
+            fflush($hLogFile);
+            flock($hLogFile, LOCK_UN);
+            fclose($hLogFile);
+        }
+        else
+        {
+            IssueLog::Error("Cannot open log file '$sLogFile' for writing.");
+            IssueLog::Info($sMessage);
+        }
     }
 
-    public static function Log($sLevel, $sMessage, $sChannel = null, $aContext = array())
+    public static function Error($sMessage)
     {
-        if (! static::$m_oFileLog) {
-            self::Enable();
-        }
+        static::Log(static::ERROR, $sMessage);
+    }
 
-        parent::Log($sLevel, $sMessage, $sChannel, $aContext);
+
+    public static function Warning($sMessage)
+    {
+        static::Log(static::WARNING, $sMessage);
+    }
+
+    public static function Info($sMessage)
+    {
+        static::Log(static::INFO, $sMessage);
+    }
+
+    public static function Debug($sMessage)
+    {
+        static::Log(static::DEBUG, $sMessage);
     }
 }
