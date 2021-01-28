@@ -24,7 +24,7 @@ class Logger
     {
         if (static::$bDebug === null)
         {
-            static::$bDebug = MetaModel::GetModuleSetting('combodo-saml', 'debug', true);
+            static::$bDebug = MetaModel::GetModuleSetting('combodo-saml', 'debug', false);
         }
 
         if ((!static::$bDebug) && ($sLogLevel != static::ERROR))

@@ -24,6 +24,7 @@ Logger::Debug("Processing Logout Response (bRetrieveParametersFromServer = $bRet
 
 if (isset($_GET['SAMLResponse'])) {
     $sSAMLResponse = base64_decode($_GET['SAMLResponse']) ?: $_GET['SAMLResponse'];
+    $sSAMLResponse = @gzinflate($sSAMLResponse) ?: $sSAMLResponse;
     Logger::Debug(sprintf("GET SAMLResponse is:\n%s", $sSAMLResponse));
 } else {
     Logger::Debug(sprintf("GET SAMLResponse is empty"));

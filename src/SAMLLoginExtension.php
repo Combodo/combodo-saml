@@ -120,7 +120,8 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 	{
 		if ($_SESSION['login_mode'] == 'saml')
 		{
-			$_SESSION['can_logoff'] = true;
+			$bCanLogoff = (bool)MetaModel::GetModuleSetting('combodo-saml', 'can_logoff', false);
+			$_SESSION['can_logoff'] = true; //$bCanLogoff;
 			return LoginWebPage::CheckLoggedUser($iErrorCode);
 		}
 		return LoginWebPage::LOGIN_FSM_CONTINUE;
