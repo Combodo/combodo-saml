@@ -8,6 +8,8 @@
 namespace Combodo\iTop\Extension\Saml;
 
 use AbstractLoginFSMExtension;
+use Exception;
+use IssueLog;
 use MetaModel;
 use Dict;
 use iLoginUIExtension;
@@ -29,7 +31,14 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 	 */
 	public function ListSupportedLoginModes()
 	{
-		return array('saml');
+		try {
+			$oConfig = new Config();
+			new Auth($oConfig->GetSettings());
+		} catch (Exception $e) {
+			IssueLog::Error("No valid SAML configuration found");
+			return [];
+		}
+		return ['saml'];
 	}
 
 	protected function OnReadCredentials(&$iErrorCode)
@@ -56,7 +65,11 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
                     }
 				}
 
-                $sOriginURL = utils::GetCurrentAbsoluteUrl();
+				if (method_exists('utils', 'GetCurrentAbsoluteUrl')) {
+					$sOriginURL = utils::GetCurrentAbsoluteUrl();
+				} else {
+					$sOriginURL = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+				}
 				if (!utils::StartsWith($sOriginURL, utils::GetAbsoluteUrlAppRoot()))
 				{
 					// If the found URL does not start with the configured AppRoot URL

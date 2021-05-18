@@ -185,8 +185,9 @@ HTML
 
 	$sUrl = MetaModel::GetModuleSetting('combodo-saml', 'idp_metadata_url','');
 	DisplayInputForm($oP, $sUrl, '');
-	
-	$aSettings = Config::GetSettings();
+
+	$oConfig = new Config();
+	$aSettings = $oConfig->GetSettings();
 	$sSafePrivateKey = (isset($aSettings['sp']['privateKey']) && ($aSettings['sp']['privateKey'] != '')) ? HIDDEN_PRIVATE_KEY : '';
 	$sSafeX509Cert = isset($aSettings['sp']['x509cert']) ? htmlentities($aSettings['sp']['x509cert'], ENT_QUOTES, 'UTF-8') : '';
 
