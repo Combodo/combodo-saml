@@ -8,34 +8,58 @@ require_once('../approot.inc.php');
 require_once (APPROOT.'bootstrap.inc.php');
 require_once (APPROOT.'application/startup.inc.php');
 
+use Combodo\iTop\Application\UI\Base\Component\CollapsibleSection\CollapsibleSectionUIBlockFactory;
+use Combodo\iTop\Application\UI\Base\Component\Html\HtmlFactory;
 use Combodo\iTop\Extension\Saml\Config;
 
 define('HIDDEN_PRIVATE_KEY', '*** private key no displayed ***');
+define('SAML_XML_LEGACY_VERSION', 1.7);
+
+function SamlUseLegacy()
+{
+	return SAML_XML_LEGACY_VERSION !== '' ? version_compare(ITOP_DESIGN_LATEST_VERSION, SAML_XML_LEGACY_VERSION, '<=') : false;
+}
+
 
 function DisplayInputForm(WebPage $oP, $sUrl, $sRawXml)
 {
 	$sSafeUrl = htmlentities($sUrl, ENT_QUOTES, 'UTF-8');
 	$oP->add(
 <<<HTML
+	<div class="ibo-is-html-content saml-input-form">
 	<h2>Importing the Identity Provider meta data</h2>
 	<form method="post">
 	<p>Enter the URL of the meta data from the Identity Provider (IdP):</p>
-	<p><input type="text" size="50" name="url" placeholder="https://my-idp-server/metadata" value="$sSafeUrl"></input></p>
+	<p><input type="text" class="ibo-input" size="50" name="url" placeholder="https://my-idp-server/metadata" value="$sSafeUrl"></input></p>
 HTML
 	);
-	$oP->StartCollapsibleSection('Paste the XML meta data:', false, 'xml_direct_input');
 	$sSafeXml = htmlentities($sRawXml, ENT_QUOTES, 'UTF-8');
-	$oP->add(
-<<<HTML
+	if(SamlUseLegacy()){
+		$oP->StartCollapsibleSection('Paste the XML meta data:', false, 'xml_direct_input');
+		$oP->add(
+			<<<HTML
 	    <p><textarea name="xml_meta_data" style="width: 30rem; height:10rem;">$sSafeXml</textarea></p>
 HTML
-	);
-	$oP->EndCollapsibleSection();
+		);
+		$oP->EndCollapsibleSection();
+
+	}
+	else{
+		$oInputCollapsibleBlock = CollapsibleSectionUIBlockFactory::MakeStandard('Paste the XML meta data');
+		$oHtml = HtmlFactory::MakeHtmlContent(
+			<<<HTML
+	    <p><textarea class="ibo-input ibo-is-code" name="xml_meta_data" style="width: 30rem; height:10rem;">$sSafeXml</textarea></p>
+HTML
+		);
+		$oInputCollapsibleBlock->AddSubBlock($oHtml);
+		$oP->AddUiBlock($oInputCollapsibleBlock);
+	}
 	$oP->add(
 <<<HTML
-		<p><button type="submit">Check Meta Data</button></p>
+		<p><button class="ibo-button ibo-is-regular ibo-is-secondary" type="submit">Check Meta Data</button></p>
 		<input type="hidden" name="operation" value="check"/>
 	</form>
+	</div>
 HTML
 	);
 	
@@ -76,22 +100,38 @@ function CheckMetaData(WebPage $oP, $sUrl, $sRawXml)
 		$sSafeXml = htmlentities($sRawXml, ENT_QUOTES, 'UTF-8');
 		$oP->add(
 <<<HTML
-		<div class="header_message message_ok">Ok, the meta data look correct.</div>
+		<div class="header_message message_ok ibo-alert ibo-is-success ibo-is-opened">Ok, the meta data look correct.</div>
 		<form method="post">
 		<input type="hidden" name="operation" value="update"/>
 		<input type="hidden" name="url" value="$sSafeURL"/>
 		<input type="hidden" name="xml_meta_data" value="$sSafeXml"/>
-		<button type="submit">Update iTop Configuration</button>
+		<button class="ibo-button ibo-is-regular ibo-is-primary" type="submit">Update iTop Configuration</button>
 		</form>
 HTML
 		);
-		$oP->StartCollapsibleSection('PHP configuration:', false, 'saml_conf');
-		$oP->add('<pre>'.var_export($aIdP, true).'</pre>');
+		if(SamlUseLegacy()) {
+			$oP->StartCollapsibleSection('PHP configuration:', false, 'saml_conf');
+			$oP->add('<pre>'.var_export($aIdP, true).'</pre>');
+			$oP->EndCollapsibleSection();
+		}
+		else{
+			$oPHPConfCollapsibleBlock = CollapsibleSectionUIBlockFactory::MakeStandard('PHP configuration');
+			$oHtml = HtmlFactory::MakeHtmlContent('<pre>'.var_export($aIdP, true).'</pre>');
+			$oPHPConfCollapsibleBlock->AddSubBlock($oHtml);
+			$oP->AddUiBlock($oPHPConfCollapsibleBlock);
+		}
+	}
+	if(SamlUseLegacy()) {
+		$oP->StartCollapsibleSection('Raw Meta Data:', false, 'saml_metadata');
+		$oP->add('<pre>'.htmlentities($sMetaData, ENT_QUOTES, 'UTF-8').'</pre>');
 		$oP->EndCollapsibleSection();
 	}
-	$oP->StartCollapsibleSection('Raw Meta Data:', false, 'saml_metadata');
-	$oP->add('<pre>'.htmlentities($sMetaData, ENT_QUOTES, 'UTF-8').'</pre>');
-	$oP->EndCollapsibleSection();
+	else{
+		$oRawMetaCollapsibleBlock = CollapsibleSectionUIBlockFactory::MakeStandard('Raw Meta Data');
+		$oHtml = HtmlFactory::MakeHtmlContent('<pre>'.htmlentities($sMetaData, ENT_QUOTES, 'UTF-8').'</pre>');
+		$oRawMetaCollapsibleBlock->AddSubBlock($oHtml);
+		$oP->AddUiBlock($oRawMetaCollapsibleBlock);
+	}
 }
 
 function UpdateIdPConfiguration(WebPage $oP, $sUrl, $sRawXml)
@@ -166,22 +206,46 @@ function GetMetaData($sUrl, $sXmlMetaData)
 function DisplayWelcomePage(WebPage $oP)
 {
 	$sModuleURL = utils::GetAbsoluteUrlModulesRoot().'/combodo-saml';
-	
-	$oP->add(
-<<<HTML
-	<h1>Single Sign-On configuration using SAML</h1>
-	<p><img src="$sModuleURL/asset/img/SAML-configuration.svg"></p>
-	<p>To enable the Single Sign On (SSO) based on SAML in iTop, you have to configure both:</p>
-	<ul>
-	<li>iTop as a SAML <b>Service Provider</b> (SP) connected to your SAML server</li>
-	<li>Your SAML server as a SAML <b>Identity Provider</b> (IdP) accepting this instance of iTop</li>
-	</ul>
-	<p>This configuration is done by echanging XML meta data between both systems.
-	You must export the meta data describing iTop as a Service provider to your SAML server in order to allow iTop to use the Identity Provider.
-	Similarly you must configure the Identity Provider to be used by iTop. This is achieved by importing the XML meta data published by your SAML server into iTop.</p>
-	<hr/>
+	if(SamlUseLegacy()) {
+		$oP->add(
+			<<<HTML
+		<h1>Single Sign-On configuration using SAML</h1>
+		<p><img src="$sModuleURL/asset/img/SAML-configuration.svg"></p>
+		<p>To enable the Single Sign On (SSO) based on SAML in iTop, you have to configure both:</p>
+		<ul>
+		<li>iTop as a SAML <b>Service Provider</b> (SP) connected to your SAML server</li>
+		<li>Your SAML server as a SAML <b>Identity Provider</b> (IdP) accepting this instance of iTop</li>
+		</ul>
+		<p>This configuration is done by echanging XML meta data between both systems.
+		You must export the meta data describing iTop as a Service provider to your SAML server in order to allow iTop to use the Identity Provider.
+		Similarly you must configure the Identity Provider to be used by iTop. This is achieved by importing the XML meta data published by your SAML server into iTop.</p>
+		<hr/>
 HTML
-	);
+		);
+	}
+	else{
+		$oHeaderCollapsibleBlock = CollapsibleSectionUIBlockFactory::MakeStandard('Single Sign-On configuration using SAML');
+		$sHtmlContent = 
+			<<<HTML
+		<div class="saml-welcome-content">
+		<div>
+			<p>To enable the Single Sign On (SSO) based on SAML in iTop, you have to configure both:</p>
+			<ul>
+			<li>iTop as a SAML <b>Service Provider</b> (SP) connected to your SAML server</li>
+			<li>Your SAML server as a SAML <b>Identity Provider</b> (IdP) accepting this instance of iTop</li>
+			</ul>
+			<p>This configuration is done by echanging XML meta data between both systems.
+			You must export the meta data describing iTop as a Service provider to your SAML server in order to allow iTop to use the Identity Provider.
+			Similarly you must configure the Identity Provider to be used by iTop. This is achieved by importing the XML meta data published by your SAML server into iTop.</p>
+		</div>
+				<div><img src="$sModuleURL/asset/img/SAML-configuration.svg"></div>
+		</div>
+HTML;
+		$oHtml = HtmlFactory::MakeHtmlContent($sHtmlContent);
+		$oHeaderCollapsibleBlock->AddSubBlock($oHtml);	
+		$oHeaderCollapsibleBlock->SetOpenedByDefault(true);	
+		$oP->AddUiBlock($oHeaderCollapsibleBlock);
+	}
 
 	$sUrl = MetaModel::GetModuleSetting('combodo-saml', 'idp_metadata_url','');
 	DisplayInputForm($oP, $sUrl, '');
@@ -199,34 +263,35 @@ HTML
 	$oP->add(
 <<<HTML
 <hr/>
+<div class="ibo-is-html-content">
 <form id="certificate_form" method="post">
 <input type="hidden" name="operation" value="update_certificate"/>
 <h2>Configuring the iTop Service Provider</h2>
 <p><input type="checkbox" name="debug" $sDebugChecked value="1" id="debug_checkbox"><label for="debug_checkbox"> Debug mode (more debug information logged to the file <i>log/saml.log</i>, <b>not recommended</b> in production.)</label</p>
 <p>NameID or attribute <i>in the IdP response</i> holding the login/identifier:</p>
-<p><input type="text" name="name_id" style="width: 10em" placeholder="uid" value="$sSafeNameID"/> (For example: NameID, uid, email...)</p>
+<p><input class="ibo-input saml-uid-input"  type="text" name="name_id" style="width: 10em" placeholder="uid" value="$sSafeNameID"/> (For example: NameID, uid, email...)</p>
 <p>Enter the X509 certificate and the private key to use for signing iTop's SAML requests. You can use <a href="https://www.samltool.com/self_signed_certs.php" target="_blank">this online tool</a> to generate a self-signed certificate.</p>
 <p>If you skip this configuration the requests will NOT be signed.</p>
 <p>Private Key:</p>
-<p><textarea style="width:35rem;height:10rem;" name="private_key" placeholder="-----BEGIN PRIVATE KEY-----
+<p><textarea class="ibo-input ibo-is-code" style="width:35rem;height:10rem;" name="private_key" placeholder="-----BEGIN PRIVATE KEY-----
 ...
 ...
 ...
 -----END PRIVATE KEY-----">$sSafePrivateKey</textarea></p>
 <p>X509 certificate:</p>
-<p><textarea style="width:35rem;height:10rem;" name="x509cert" placeholder="-----BEGIN CERTIFICATE-----
+<p><textarea class="ibo-input ibo-is-code" style="width:35rem;height:10rem;" name="x509cert" placeholder="-----BEGIN CERTIFICATE-----
 ...
 ...
 ...
 -----END CERTIFICATE-----">$sSafeX509Cert</textarea></p>
-<p><button type="submit">Save SP configuration</button></p>
+<p><button class="ibo-button ibo-is-regular ibo-is-primary" type="submit">Save SP configuration</button></p>
 </form>
 
 <hr/>
 
 <h2>Exporting iTop's Service Provider meta data</h2>
 <p>Use the following link to export iTop's meta data: <a target="_blank" href="$sMetaDataURI">Meta Data Export</a></p>
-<p>&nbsp;</p>
+</div>
 HTML
 	);
 }
@@ -292,6 +357,9 @@ LoginWebPage::DoLogin(); // Check user rights and prompt if needed
 ApplicationMenu::CheckMenuIdEnabled('SAMLConfiguration');
 
 $oP = new iTopWebPage('SAML Configuration');
+if(!SamlUseLegacy()){
+	$oP->add_saas('env-'.utils::GetCurrentEnvironment().'/combodo-saml/css/configuration.scss');
+}
 try
 {
 	$sOperation = utils::ReadParam('operation', '');
