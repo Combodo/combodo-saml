@@ -8,15 +8,15 @@
 namespace Combodo\iTop\Extension\Saml;
 
 use AbstractLoginFSMExtension;
-use Exception;
-use IssueLog;
-use MetaModel;
 use Dict;
+use Exception;
 use iLoginUIExtension;
 use iLogoutExtension;
+use IssueLog;
 use LoginBlockExtension;
 use LoginTwigContext;
 use LoginWebPage;
+use MetaModel;
 use OneLogin\Saml2\Auth;
 use utils;
 
@@ -32,6 +32,9 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 	public function ListSupportedLoginModes()
 	{
 		try {
+			if (!in_array('saml', MetaModel::GetConfig()->GetAllowedLoginTypes())) {
+				return [];
+			}
 			$oConfig = new Config();
 			new Auth($oConfig->GetSettings());
 		} catch (Exception $e) {
