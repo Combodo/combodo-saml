@@ -88,8 +88,10 @@ $_SESSION['auth_user'] = $sLogin;
 $_SESSION['login_mode'] = 'saml';
 unset($_SESSION['login_will_redirect']);
 
-if (isset($_POST['RelayState']) && OneLogin\Saml2\Utils::getSelfURL() != $_POST['RelayState'])
+if (isset($_POST['RelayState']) && OneLogin\Saml2\Utils::getSelfURL() != $_POST['RelayState'] && utils::StartsWith($_POST['RelayState'], utils::GetAbsoluteUrlAppRoot()))
 {
 	Logger::Debug('Redirecting to: '.$_POST['RelayState']);
 	$oAuth->redirectTo($_POST['RelayState'], array('login_saml' => 'connected'));
+} else {
+	$oAuth->redirectTo(utils::GetAbsoluteUrlAppRoot().'pages/UI.php', array('login_saml' => 'connected'));
 }
