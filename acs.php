@@ -8,11 +8,17 @@
 /**
  *  SP Assertion Consumer Service Endpoint
  */
+
+use Combodo\iTop\Application\Helper\Session;
 use Combodo\iTop\Extension\Saml\Logger;
 
 require_once('../../approot.inc.php');
 require_once (APPROOT.'bootstrap.inc.php');
 require_once (APPROOT.'application/startup.inc.php');
+
+if (class_exists('Combodo\iTop\Application\Helper\Session')) {
+	Session::Start();
+}
 
 $oConfig = new Combodo\iTop\Extension\Saml\Config();
 $oAuth = new OneLogin\Saml2\Auth($oConfig->GetSettings());
