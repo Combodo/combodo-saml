@@ -20,7 +20,7 @@ class CombodoSamlMenuHandler extends ModuleHandlerAPI
 	 */
 	public static function OnMenuCreation()
 	{
-		$bConfigMenuEnabled = UserRights::IsActionAllowed('ResourceAdminMenu', UR_ACTION_MODIFY);
+        $bConfigMenuEnabled = UserRights::IsAdministrator();
 		if ($bConfigMenuEnabled)
 		{
 			new WebPageMenuNode(
