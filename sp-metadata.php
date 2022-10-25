@@ -32,7 +32,8 @@ use OneLogin\Saml2\Settings;
 $oP = new ajax_page('');
 $oP->SetContentType('application/xml;charset=UTF-8');
 
-$aSettings = Config::GetSettings();
+$oConfig = new Config();
+$aSettings = $oConfig->GetSettings();
 // Automatically fill-in the URLs
 Config::FillSPSettings($aSettings['sp']);
 

@@ -200,7 +200,8 @@ class Config
 	
 	public static function GetSPSettings()
 	{
-		$aConfSettings = static::GetSettings();
+		$oConf = new static();
+		$aConfSettings = $oConf->GetSettings();
 		$sPath = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
 		$aSP = array(
 			'entityId' => utils::GetAbsoluteUrlModulesRoot().'combodo-saml',
@@ -222,7 +223,8 @@ class Config
 	
 	public static function FillSPSettings(&$aSP)
 	{
-		$aConfSettings = static::GetSettings();
+		$oConf = new static();
+		$aConfSettings = $oConf->GetSettings();
 		$sPath = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
 		$aSP['entityId'] = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
 		$aSP['singleLogoutService'] = array(
