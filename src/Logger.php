@@ -6,6 +6,7 @@
  */
 
 namespace Combodo\iTop\Extension\Saml;
+use IssueLog;
 use MetaModel;
 
 /**
