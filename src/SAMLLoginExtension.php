@@ -46,6 +46,10 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 
 	protected function OnReadCredentials(&$iErrorCode)
 	{
+		if (LoginWebPage::getIOnExit() === LoginWebPage::EXIT_RETURN) {
+			// Not allowed if not already connected
+			return LoginWebPage::LOGIN_FSM_CONTINUE;
+		}
 		if (!isset($_SESSION['login_mode']) || ($_SESSION['login_mode'] == 'saml'))
 		{
 			$_SESSION['login_mode'] = 'saml';
@@ -87,7 +91,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 
 	protected function OnCheckCredentials(&$iErrorCode)
 	{
-		if ($_SESSION['login_mode'] == 'saml')
+		if (isset($_SESSION['login_mode']) && $_SESSION['login_mode'] == 'saml')
 		{
             if (!isset($_SESSION['auth_user']))
             {
@@ -101,7 +105,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 
 	protected function OnCredentialsOK(&$iErrorCode)
 	{
-		if ($_SESSION['login_mode'] == 'saml')
+		if (isset($_SESSION['login_mode']) && $_SESSION['login_mode'] == 'saml')
 		{
 			$sAuthUser = $_SESSION['auth_user'];
 			if (!LoginWebPage::CheckUser($sAuthUser))
@@ -120,7 +124,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 
 	protected function OnError(&$iErrorCode)
 	{
-		if ($_SESSION['login_mode'] == 'saml')
+		if (isset($_SESSION['login_mode']) && $_SESSION['login_mode'] == 'saml')
 		{
 			if ($iErrorCode != LoginWebPage::EXIT_CODE_MISSINGLOGIN)
 			{
@@ -135,7 +139,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 
 	protected function OnConnected(&$iErrorCode)
 	{
-		if ($_SESSION['login_mode'] == 'saml')
+		if (isset($_SESSION['login_mode']) && $_SESSION['login_mode'] == 'saml')
 		{
 			$bCanLogoff = (bool)MetaModel::GetModuleSetting('combodo-saml', 'can_logoff', false);
 			$_SESSION['can_logoff'] = $bCanLogoff;
