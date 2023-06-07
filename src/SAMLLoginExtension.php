@@ -126,6 +126,10 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 	{
 		if (isset($_SESSION['login_mode']) && $_SESSION['login_mode'] == 'saml')
 		{
+			if (LoginWebPage::getIOnExit() === LoginWebPage::EXIT_RETURN) {
+				// Not allowed if not already connected
+				return LoginWebPage::LOGIN_FSM_CONTINUE;
+			}
 			if ($iErrorCode != LoginWebPage::EXIT_CODE_MISSINGLOGIN)
 			{
 				Logger::Debug("OnError: User not allowed!");
