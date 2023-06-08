@@ -1,14 +1,13 @@
 <?php
 namespace Combodo\iTop\Test\UnitTest\Core\CombodoSaml;
 
-use Combodo\iTop\Test\UnitTest\ItopTestCase;
 use Combodo\iTop\Extension\Saml\Config;
+use Combodo\iTop\Test\UnitTest\ItopTestCase;
 
 class IdPParsingTest extends ItopTestCase
 {
 	
-	public function setup()
-	{
+	public function setup(): void {
 		parent::setup();
 		require_once(dirname(__DIR__).'/src/Config.php');
 	}
