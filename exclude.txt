@@ -1,3 +1,2 @@
-test
 tests
 README.md
