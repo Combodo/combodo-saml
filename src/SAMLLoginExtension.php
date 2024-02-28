@@ -165,8 +165,11 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 		// to remember which user was authenticated with SAML...
 		$sLogin = $_SESSION['saml_auth_user_for_logout'];
 		unset($_SESSION['saml_auth_user_for_logout']);
-		Logger::Debug("Logout(".utils::GetAbsoluteUrlAppRoot().'pages/UI.php'.", array(), '$sLogin')");
-		$oAuth->logout(utils::GetAbsoluteUrlAppRoot().'pages/UI.php', array(), $sLogin); // Will redirect and exit
+		if(!empty($oAuth->getSLOurl()))
+		{
+			Logger::Debug("Logout(".utils::GetAbsoluteUrlAppRoot().'pages/UI.php'.", array(), '$sLogin')");
+			$oAuth->logout(utils::GetAbsoluteUrlAppRoot().'pages/UI.php', array(), $sLogin); // Will redirect and exit
+		}
 	}
 
     /**
