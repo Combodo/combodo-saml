@@ -169,6 +169,8 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 		{
 			Logger::Debug("Logout(".utils::GetAbsoluteUrlAppRoot().'pages/UI.php'.", array(), '$sLogin')");
 			$oAuth->logout(utils::GetAbsoluteUrlAppRoot().'pages/UI.php', array(), $sLogin); // Will redirect and exit
+		} else {
+			Logger::Debug("Didn't log out of the SAML identity provider as there is no \"SLOurl\" configured");
 		}
 	}
 
