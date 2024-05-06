@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright   Copyright (C) 2020 Combodo SARL
+ * @copyright   Copyright (C) 2024 Combodo SAS
  * @license     https://www.combodo.com/documentation/combodo-software-license.html
  *
  */

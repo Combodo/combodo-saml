@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2019-2020 Combodo SARL
+ * Copyright (C) 2019-2024 Combodo SAS
  *
  * This file is part of iTop.
  *
