@@ -30,7 +30,7 @@ SetupWebPage::AddModule(
 		//
 		'datamodel' => array(
 			'model.combodo-saml.php',
-			'main.php',
+			'vendor/autoload.php',
 		),
 		'webservice' => array(
 			

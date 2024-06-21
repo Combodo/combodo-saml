@@ -17,7 +17,7 @@ class ComposerStaticInit88addb8a081897ebcbb38a17a83624dd
         ),
         'C' => 
         array (
-            'Combodo\\TestSaml2\\' => 18,
+            'Combodo\\iTop\\Extension\\Saml\\' => 28,
         ),
     );
 
@@ -30,10 +30,33 @@ class ComposerStaticInit88addb8a081897ebcbb38a17a83624dd
         array (
             0 => __DIR__ . '/..' . '/onelogin/php-saml/src',
         ),
-        'Combodo\\TestSaml2\\' => 
+        'Combodo\\iTop\\Extension\\Saml\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
+    );
+
+    public static $classMap = array (
+        'Combodo\\iTop\\Extension\\Saml\\Config' => __DIR__ . '/../..' . '/src/Config.php',
+        'Combodo\\iTop\\Extension\\Saml\\Logger' => __DIR__ . '/../..' . '/src/Logger.php',
+        'Combodo\\iTop\\Extension\\Saml\\SAMLLoginExtension' => __DIR__ . '/../..' . '/src/SAMLLoginExtension.php',
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'OneLogin\\Saml2\\Auth' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/Auth.php',
+        'OneLogin\\Saml2\\AuthnRequest' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/AuthnRequest.php',
+        'OneLogin\\Saml2\\Constants' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/Constants.php',
+        'OneLogin\\Saml2\\Error' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/Error.php',
+        'OneLogin\\Saml2\\IdPMetadataParser' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/IdPMetadataParser.php',
+        'OneLogin\\Saml2\\LogoutRequest' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/LogoutRequest.php',
+        'OneLogin\\Saml2\\LogoutResponse' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/LogoutResponse.php',
+        'OneLogin\\Saml2\\Metadata' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/Metadata.php',
+        'OneLogin\\Saml2\\Response' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/Response.php',
+        'OneLogin\\Saml2\\Settings' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/Settings.php',
+        'OneLogin\\Saml2\\Utils' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/Utils.php',
+        'OneLogin\\Saml2\\ValidationError' => __DIR__ . '/..' . '/onelogin/php-saml/src/Saml2/ValidationError.php',
+        'RobRichards\\XMLSecLibs\\Utils\\XPath' => __DIR__ . '/..' . '/robrichards/xmlseclibs/src/Utils/XPath.php',
+        'RobRichards\\XMLSecLibs\\XMLSecEnc' => __DIR__ . '/..' . '/robrichards/xmlseclibs/src/XMLSecEnc.php',
+        'RobRichards\\XMLSecLibs\\XMLSecurityDSig' => __DIR__ . '/..' . '/robrichards/xmlseclibs/src/XMLSecurityDSig.php',
+        'RobRichards\\XMLSecLibs\\XMLSecurityKey' => __DIR__ . '/..' . '/robrichards/xmlseclibs/src/XMLSecurityKey.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
@@ -41,6 +64,7 @@ class ComposerStaticInit88addb8a081897ebcbb38a17a83624dd
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit88addb8a081897ebcbb38a17a83624dd::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit88addb8a081897ebcbb38a17a83624dd::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit88addb8a081897ebcbb38a17a83624dd::$classMap;
 
         }, null, ClassLoader::class);
     }
