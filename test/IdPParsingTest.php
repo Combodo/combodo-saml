@@ -9,7 +9,7 @@ class IdPParsingTest extends ItopTestCase
 	
 	public function setup(): void {
 		parent::setup();
-		require_once(dirname(__DIR__).'/src/Config.php');
+		$this->RequireOnceCurrentModuleFile('/src/Config.php');
 	}
 	
 	/**
