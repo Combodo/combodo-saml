@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => '__root__',
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => '128d27ccb5ed8479c8a5a574ccdeb1262f91b76a',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => true,
+    ),
+    'versions' => array(
+        '__root__' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => '128d27ccb5ed8479c8a5a574ccdeb1262f91b76a',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'onelogin/php-saml' => array(
+            'pretty_version' => '3.1.1',
+            'version' => '3.1.1.0',
+            'reference' => 'c9026b26395a65184550055d9a01bdf9dbd30861',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../onelogin/php-saml',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'robrichards/xmlseclibs' => array(
+            'pretty_version' => '3.0.3',
+            'version' => '3.0.3.0',
+            'reference' => '406c68ac9124db033d079284b719958b829cb830',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../robrichards/xmlseclibs',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);
