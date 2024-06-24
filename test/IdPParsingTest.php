@@ -9,7 +9,7 @@ class IdPParsingTest extends ItopTestCase
 	
 	public function setup(): void {
 		parent::setup();
-		$this->RequireOnceCurrentModuleFile('/src/Config.php');
+		$this->RequireOnceItopFile('env-production/combodo-saml/src/Config.php');
 	}
 	
 	/**
