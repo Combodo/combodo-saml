@@ -20,4 +20,6 @@ Dict::Add('FR FR', 'French', 'Français', [
 	'SAML:Login:SignInTooltip' => 'Cliquer ici pour s\'identifier avec le serveur SAML',
 	'SAML:SimpleSaml:GenerateSimpleSamlConf' => 'Générer la configuration SimpleSaml',
 	'SAML:SimpleSaml:Instructions' => 'Ajouter ces lignes à la configuration: simplesamlphp/metadata/saml20-sp-remote.php',
+	'Menu:DelegatedAuthentication' => 'Authentification déléguée',
+	'Menu:DelegatedAuthentication+'=> 'Configurer l\'authentification via un fournisseur de service',
 ]);
