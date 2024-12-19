@@ -1,5 +1,36 @@
 xmlseclibs.php
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+20, Nov 2024, 3.1.3
+Bug Fixes:
+- remove loadKey check due to BC issues
+
+20, Nov 2024, 3.1.2
+Improvements:
+- Add tab to list of whitespace values to remove from cert. refs #252
+- loadKey should check return value for openssl_get_privatekey (sammarshallou)
+- Switch to GitHub actions (SharkMachine)
+
+05, Sep 2020, 3.1.1
+Features:
+- Support OAEP (iggyvolz)
+
+Bug Fixes:
+- Fix AES128 (iggyvolz)
+
+Improvements:
+- Fix tests for older PHP
+
+22, Apr 2020, 3.1.0
+Features:
+- Support AES-GCM. Requires PHP 7.1. (François Kooman)
+
+Improvements:
+- Fix Travis tests for older PHP versions.
+- Use DOMElement interface to fix some IDEs reporting documentation errors
+
+Bug Fixes:
+- FIX missing InclusiveNamespaces PrefixList from Java + Apache WSS4J. (njake)
+
 06, Nov 2019, 3.0.4
 Security Improvements:
 - Insure only a single SignedInfo element exists within a signature during 

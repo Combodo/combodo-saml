@@ -23,13 +23,12 @@
 require_once('../approot.inc.php');
 require_once (APPROOT.'bootstrap.inc.php');
 require_once (APPROOT.'application/startup.inc.php');
-require_once (APPROOT.'application/ajaxwebpage.class.inc.php');
 
 use Combodo\iTop\Extension\Saml\Config;
 use OneLogin\Saml2\Metadata;
 use OneLogin\Saml2\Settings;
 
-$oP = new ajax_page('');
+$oP = new AjaxPage('');
 $oP->SetContentType('application/xml;charset=UTF-8');
 
 $oConfig = new Config();

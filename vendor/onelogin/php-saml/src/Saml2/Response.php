@@ -2,15 +2,13 @@
 /**
  * This file is part of php-saml.
  *
- * (c) OneLogin Inc
- *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
  * @package OneLogin
- * @author  OneLogin Inc <saml-info@onelogin.com>
- * @license MIT https://github.com/onelogin/php-saml/blob/master/LICENSE
- * @link    https://github.com/onelogin/php-saml
+ * @author  Sixto Martin <sixto.martin.garcia@gmail.com>
+ * @license MIT https://github.com/SAML-Toolkits/php-saml/blob/master/LICENSE
+ * @link    https://github.com/SAML-Toolkits/php-saml
  */
 
 namespace OneLogin\Saml2;
@@ -172,7 +170,7 @@ class Response
 
                 if ($security['wantXMLValidation']) {
                     $errorXmlMsg = "Invalid SAML Response. Not match the saml-schema-protocol-2.0.xsd";
-                    $res = Utils::validateXML($this->document, 'saml-schema-protocol-2.0.xsd', $this->_settings->isDebugActive());
+                    $res = Utils::validateXML($this->document, 'saml-schema-protocol-2.0.xsd', $this->_settings->isDebugActive(), $this->_settings->getSchemasPath());
                     if (!$res instanceof DOMDocument) {
                         throw new ValidationError(
                             $errorXmlMsg,
@@ -182,7 +180,7 @@ class Response
 
                     // If encrypted, check also the decrypted document
                     if ($this->encrypted) {
-                        $res = Utils::validateXML($this->decryptedDocument, 'saml-schema-protocol-2.0.xsd', $this->_settings->isDebugActive());
+                        $res = Utils::validateXML($this->decryptedDocument, 'saml-schema-protocol-2.0.xsd', $this->_settings->isDebugActive(), $this->_settings->getSchemasPath());
                         if (!$res instanceof DOMDocument) {
                             throw new ValidationError(
                                 $errorXmlMsg,
@@ -195,16 +193,31 @@ class Response
 
                 $currentURL = Utils::getSelfRoutedURLNoQuery();
 
+                $responseInResponseTo = null;
                 if ($this->document->documentElement->hasAttribute('InResponseTo')) {
                     $responseInResponseTo = $this->document->documentElement->getAttribute('InResponseTo');
                 }
 
-                // Check if the InResponseTo of the Response matchs the ID of the AuthNRequest (requestId) if provided
-                if (isset($requestId) && isset($responseInResponseTo) && $requestId != $responseInResponseTo) {
+                if (!isset($requestId) && isset($responseInResponseTo) && $security['rejectUnsolicitedResponsesWithInResponseTo']) {
                     throw new ValidationError(
-                        "The InResponseTo of the Response: $responseInResponseTo, does not match the ID of the AuthNRequest sent by the SP: $requestId",
+                        "The Response has an InResponseTo attribute: " . $responseInResponseTo . " while no InResponseTo was expected",
                         ValidationError::WRONG_INRESPONSETO
                     );
+                }
+
+                // Check if the InResponseTo of the Response matchs the ID of the AuthNRequest (requestId) if provided
+                if (isset($requestId) && $requestId != $responseInResponseTo) {
+                    if ($responseInResponseTo == null) {
+                        throw new ValidationError(
+                            "No InResponseTo at the Response, but it was provided the requestId related to the AuthNRequest sent by the SP: $requestId",
+                            ValidationError::WRONG_INRESPONSETO
+                        );
+                    } else {
+                        throw new ValidationError(
+                            "The InResponseTo of the Response: $responseInResponseTo, does not match the ID of the AuthNRequest sent by the SP: $requestId",
+                            ValidationError::WRONG_INRESPONSETO
+                        );
+                    }
                 }
 
                 if (!$this->encrypted && $security['wantAssertionsEncrypted']) {
@@ -254,7 +267,10 @@ class Response
 
                 // Check destination
                 if ($this->document->documentElement->hasAttribute('Destination')) {
-                    $destination = trim($this->document->documentElement->getAttribute('Destination'));
+                    $destination = $this->document->documentElement->getAttribute('Destination');
+                    if (isset($destination)) {
+                        $destination = trim($destination);
+                    }
                     if (empty($destination)) {
                         if (!$security['relaxDestinationValidation']) {
                             throw new ValidationError(
@@ -263,10 +279,11 @@ class Response
                             );
                         }
                     } else {
-                        if (strpos($destination, $currentURL) !== 0) {
+                        $urlComparisonLength = $security['destinationStrictlyMatches'] ? strlen($destination) : strlen($currentURL);
+                        if (strncmp($destination, $currentURL, $urlComparisonLength) !== 0) {
                             $currentURLNoRouted = Utils::getSelfURLNoQuery();
-
-                            if (strpos($destination, $currentURLNoRouted) !== 0) {
+                            $urlComparisonLength = $security['destinationStrictlyMatches'] ? strlen($destination) : strlen($currentURLNoRouted);
+                            if (strncmp($destination, $currentURLNoRouted, $urlComparisonLength) !== 0) {
                                 throw new ValidationError(
                                     "The response was received at $currentURL instead of $destination",
                                     ValidationError::WRONG_DESTINATION
@@ -279,12 +296,9 @@ class Response
                 // Check audience
                 $validAudiences = $this->getAudiences();
                 if (!empty($validAudiences) && !in_array($spEntityId, $validAudiences, true)) {
+                    $validAudiencesStr = implode(',', $validAudiences);
                     throw new ValidationError(
-                        sprintf(
-                            "Invalid audience for this Response (expected '%s', got '%s')",
-                            $spEntityId,
-                            implode(',', $validAudiences)
-                        ),
+                        "Invalid audience for this Response (expected '".$spEntityId."', got '".$validAudiencesStr."')",
                         ValidationError::WRONG_AUDIENCE
                     );
                 }
@@ -292,12 +306,14 @@ class Response
                 // Check the issuers
                 $issuers = $this->getIssuers();
                 foreach ($issuers as $issuer) {
-                    $trimmedIssuer = trim($issuer);
-                    if (empty($trimmedIssuer) || $trimmedIssuer !== $idPEntityId) {
-                        throw new ValidationError(
-                            "Invalid issuer in the Assertion/Response (expected '$idPEntityId', got '$trimmedIssuer')",
-                            ValidationError::WRONG_ISSUER
-                        );
+                    if (isset($issuer)) {
+                        $trimmedIssuer = trim($issuer);
+                        if (empty($trimmedIssuer) || $trimmedIssuer !== $idPEntityId) {
+                            throw new ValidationError(
+                                "Invalid issuer in the Assertion/Response (expected '".$idPEntityId."', got '".$trimmedIssuer."')",
+                                ValidationError::WRONG_ISSUER
+                            );
+                        }
                     }
                 }
 
@@ -383,7 +399,7 @@ class Response
                 $encryptedIDNodes = Utils::query($this->decryptedDocument, '/samlp:Response/saml:Assertion/saml:Subject/saml:EncryptedID');
                 if ($encryptedIDNodes->length > 0) {
                     throw new ValidationError(
-                        'Unsigned SAML Response that contains a signed and encrypted Assertion with encrypted nameId is not supported.',
+                        'SAML Response that contains an encrypted Assertion with encrypted nameId is not supported.',
                         ValidationError::NOT_SUPPORTED
                     );
                 }
@@ -448,7 +464,7 @@ class Response
 
     /**
      * @return string|null the ID of the assertion in the Response
-     * 
+     *
      * @throws ValidationError
      */
     public function getAssertionId()
@@ -538,7 +554,10 @@ class Response
 
         $entries = $this->_queryAssertion('/saml:Conditions/saml:AudienceRestriction/saml:Audience');
         foreach ($entries as $entry) {
-            $value = trim($entry->textContent);
+            $value = $entry->textContent;
+            if (isset($value)) {
+                $value = trim($value);
+            }
             if (!empty($value)) {
                 $audiences[] = $value;
             }
@@ -612,8 +631,8 @@ class Response
 
         $nameIdData = array();
 
+        $security = $this->_settings->getSecurityData();
         if (!isset($nameId)) {
-            $security = $this->_settings->getSecurityData();
             if ($security['wantNameId']) {
                 throw new ValidationError(
                     "NameID not found in the assertion of the Response",
@@ -621,7 +640,7 @@ class Response
                 );
             }
         } else {
-            if ($this->_settings->isStrict() && empty($nameId->nodeValue)) {
+            if ($this->_settings->isStrict() && $security['wantNameId'] && empty($nameId->nodeValue)) {
                 throw new ValidationError(
                     "An empty NameID value found",
                     ValidationError::EMPTY_NAMEID
@@ -636,7 +655,7 @@ class Response
                         $spEntityId = $spData['entityId'];
                         if ($spEntityId != $nameId->getAttribute($attr)) {
                             throw new ValidationError(
-                                "The SPNameQualifier value mistmatch the SP entityID value.",
+                                "The SPNameQualifier value mismatch the SP entityID value.",
                                 ValidationError::SP_NAME_QUALIFIER_NAME_MISMATCH
                             );
                         }
@@ -788,6 +807,9 @@ class Response
     {
         $attributes = array();
         $entries = $this->_queryAssertion('/saml:AttributeStatement/saml:Attribute');
+
+        $security = $this->_settings->getSecurityData();
+        $allowRepeatAttributeName = $security['allowRepeatAttributeName'];
         /** @var $entry DOMNode */
         foreach ($entries as $entry) {
             $attributeKeyNode = $entry->attributes->getNamedItem($keyName);
@@ -795,11 +817,13 @@ class Response
                 continue;
             }
             $attributeKeyName = $attributeKeyNode->nodeValue;
-            if (in_array($attributeKeyName, array_keys($attributes))) {
-                throw new ValidationError(
-                    "Found an Attribute element with duplicated ".$keyName,
-                    ValidationError::DUPLICATED_ATTRIBUTE_NAME_FOUND
-                );
+            if (in_array($attributeKeyName, array_keys($attributes), true)) {
+                if (!$allowRepeatAttributeName) {
+                    throw new ValidationError(
+                        "Found an Attribute element with duplicated ".$keyName,
+                        ValidationError::DUPLICATED_ATTRIBUTE_NAME_FOUND
+                    );
+                }
             }
             $attributeValues = array();
             foreach ($entry->childNodes as $childNode) {
@@ -808,7 +832,12 @@ class Response
                     $attributeValues[] = $childNode->nodeValue;
                 }
             }
-            $attributes[$attributeKeyName] = $attributeValues;
+
+            if (in_array($attributeKeyName, array_keys($attributes), true)) {
+                $attributes[$attributeKeyName] = array_merge($attributes[$attributeKeyName], $attributeValues);
+            } else {
+                $attributes[$attributeKeyName] = $attributeValues;
+            }
         }
         return $attributes;
     }
@@ -1184,13 +1213,19 @@ class Response
     /**
      * After execute a validation process, if fails this method returns the cause
      *
+     * @param bool $escape Apply or not htmlentities to the message.
+     *
      * @return null|string Error reason
      */
-    public function getError()
+    public function getError($escape = true)
     {
         $errorMsg = null;
         if (isset($this->_error)) {
-            $errorMsg = htmlentities($this->_error->getMessage());
+            if ($escape) {
+                $errorMsg = htmlentities($this->_error->getMessage());
+            } else {
+                $errorMsg = $this->_error->getMessage();
+            }
         }
         return $errorMsg;
     }
