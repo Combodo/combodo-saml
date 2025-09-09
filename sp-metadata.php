@@ -30,6 +30,7 @@ use OneLogin\Saml2\Settings;
 
 $oP = new AjaxPage('');
 $oP->SetContentType('application/xml;charset=UTF-8');
+$oP->SetOutputDataOnly(true);
 
 $oConfig = new Config();
 $aSettings = $oConfig->GetSettings();
