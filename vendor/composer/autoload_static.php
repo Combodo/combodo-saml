@@ -7,30 +7,30 @@ namespace Composer\Autoload;
 class ComposerStaticInit88addb8a081897ebcbb38a17a83624dd
 {
     public static $prefixLengthsPsr4 = array (
-        'R' => 
+        'R' =>
         array (
             'RobRichards\\XMLSecLibs\\' => 23,
         ),
-        'O' => 
+        'O' =>
         array (
             'OneLogin\\' => 9,
         ),
-        'C' => 
+        'C' =>
         array (
             'Combodo\\iTop\\Extension\\Saml\\' => 28,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'RobRichards\\XMLSecLibs\\' => 
+        'RobRichards\\XMLSecLibs\\' =>
         array (
             0 => __DIR__ . '/..' . '/robrichards/xmlseclibs/src',
         ),
-        'OneLogin\\' => 
+        'OneLogin\\' =>
         array (
             0 => __DIR__ . '/..' . '/onelogin/php-saml/src',
         ),
-        'Combodo\\iTop\\Extension\\Saml\\' => 
+        'Combodo\\iTop\\Extension\\Saml\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
