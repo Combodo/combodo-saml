@@ -12,65 +12,28 @@ use MetaModel;
 /**
  *  Simple logger to write to log/saml.log
  */
-class Logger
+class Logger extends IssueLog
 {
-    const ERROR = 'Error';
-    const WARNING = 'Warning';
-    const INFO = 'Info';
-    const DEBUG = 'Debug';
+	public const CHANNEL_DEFAULT = 'SAML';
+	public const LEVEL_DEFAULT = self::LEVEL_ERROR;
 
     private static $bDebug = null;
 
-    private static function Log($sLogLevel, $sMessage)
-    {
-        if (static::$bDebug === null)
-        {
-            static::$bDebug = MetaModel::GetModuleSetting('combodo-saml', 'debug', false);
-        }
+	public static function GetMinLogLevel($sChannel, $sConfigKey = self::ENUM_CONFIG_PARAM_FILE)
+	{
+		if ($sChannel === static::CHANNEL_DEFAULT)
+		{
+			if (static::$bDebug === null)
+			{
+				static::$bDebug = MetaModel::GetModuleSetting('combodo-saml', 'debug', false);
+			}
 
-        if ((!static::$bDebug) && ($sLogLevel != static::ERROR))
-        {
-            // If not in debug mode, log only ERROR messages
-            return;
-        }
+			if (static::$bDebug)
+			{
+				return static::LEVEL_TRACE;
+			}
+		}
 
-        $sLogFile = APPROOT.'/log/saml.log';
-
-        $hLogFile = fopen($sLogFile, 'a');
-        if ($hLogFile !== false)
-        {
-            flock($hLogFile, LOCK_EX);
-            $sDate = date('Y-m-d H:i:s');
-            fwrite($hLogFile, "$sDate | $sLogLevel | $sMessage\n");
-            fflush($hLogFile);
-            flock($hLogFile, LOCK_UN);
-            fclose($hLogFile);
-        }
-        else
-        {
-            IssueLog::Error("Cannot open log file '$sLogFile' for writing.");
-            IssueLog::Info($sMessage);
-        }
-    }
-
-    public static function Error($sMessage)
-    {
-        static::Log(static::ERROR, $sMessage);
-    }
-
-
-    public static function Warning($sMessage)
-    {
-        static::Log(static::WARNING, $sMessage);
-    }
-
-    public static function Info($sMessage)
-    {
-        static::Log(static::INFO, $sMessage);
-    }
-
-    public static function Debug($sMessage)
-    {
-        static::Log(static::DEBUG, $sMessage);
-    }
+		return parent::GetMinLogLevel($sChannel, $sConfigKey);
+	}
 }
