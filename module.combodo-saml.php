@@ -46,7 +46,14 @@ SetupWebPage::AddModule(
 		// Documentation
 		//
 		'doc.manual_setup' => '', // hyperlink to manual setup documentation, if any
-		'doc.more_information' => '', // hyperlink to more information, if any 
+		'doc.more_information' => '', // hyperlink to more information, if any
+
+        // Security
+        'delegated_authentication_endpoints' => [
+            'acs.php',
+            'sls.php',
+            'sp-metadata.php'
+        ],
 
 		// Default settings
 		//
