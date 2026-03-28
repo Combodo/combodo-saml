@@ -11,7 +11,7 @@
  */
 Dict::Add('FR FR', 'French', 'Français', [
 	'Menu:SAMLConfiguration' => 'Configuration SAML',
-	'SAML:Error:CheckTheLogFileForMoreInformation' => 'Voir le fichier "log/saml.log" pour plus information',
+	'SAML:Error:CheckTheLogFileForMoreInformation' => 'Voir le fichier journal pour plus information',
 	'SAML:Error:ErrorOccurred' => 'Une erreur est survenue',
 	'SAML:Error:Invalid_Attribute' => 'L\'authentification SAML a échoué car l\'attribut attendu \'%1$s\' n\'est pas présent dans le réponse de l\'Identity Provider (IdP). Consultez le fichier error.log pour plus d\'informations.',
 	'SAML:Error:NotAuthenticated' => 'Non authentifié',
