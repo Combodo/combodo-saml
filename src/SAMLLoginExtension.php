@@ -38,7 +38,7 @@ class SAMLLoginExtension extends AbstractLoginFSMExtension implements iLogoutExt
 			$oConfig = new Config();
 			new Auth($oConfig->GetSettings());
 		} catch (Exception $e) {
-			IssueLog::Error("No valid SAML configuration found");
+			IssueLog::Error("No valid SAML configuration found", null, [$e->getMessage()]);
 			return [];
 		}
 		return ['saml'];

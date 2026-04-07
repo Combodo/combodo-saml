@@ -12,7 +12,7 @@
 use Combodo\iTop\Application\Helper\Session;
 use Combodo\iTop\Extension\Saml\Logger;
 
-require_once('../../approot.inc.php');
+require_once(dirname(__DIR__, 2) . '/approot.inc.php');
 require_once (APPROOT.'bootstrap.inc.php');
 require_once (APPROOT.'application/startup.inc.php');
 
@@ -88,10 +88,14 @@ $_SESSION['auth_user'] = $sLogin;
 $_SESSION['login_mode'] = 'saml';
 unset($_SESSION['login_will_redirect']);
 
+$aParams = [
+	'login_saml' => 'connected',
+	'login_mode' => 'saml',
+];
 if (isset($_POST['RelayState']) && OneLogin\Saml2\Utils::getSelfURL() != $_POST['RelayState'] && utils::StartsWith($_POST['RelayState'], utils::GetAbsoluteUrlAppRoot()))
 {
 	Logger::Debug('Redirecting to: '.$_POST['RelayState']);
-	$oAuth->redirectTo($_POST['RelayState'], array('login_saml' => 'connected'));
+	$oAuth->redirectTo($_POST['RelayState'], $aParams);
 } else {
-	$oAuth->redirectTo(utils::GetAbsoluteUrlAppRoot().'pages/UI.php', array('login_saml' => 'connected'));
+	$oAuth->redirectTo(utils::GetAbsoluteUrlAppRoot().'pages/UI.php', $aParams);
 }
