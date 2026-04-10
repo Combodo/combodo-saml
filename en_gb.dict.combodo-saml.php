@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   Copyright (C) 2010-2019 Combodo SARL
  * @license     https://www.combodo.com/documentation/combodo-software-license.html
@@ -8,7 +9,7 @@
  * Localized data
  */
 
-Dict::Add('EN GB', 'British English', 'British English', array(
+Dict::Add('EN GB', 'British English', 'British English', [
 	'SAML:Error:UserNotAllowed' => 'User not allowed',
 	'SAML:Error:ErrorOccurred' => 'An error occurred',
 	'SAML:Error:CheckTheLogFileForMoreInformation' => 'Check the log file "log/saml.log" for more information.',
@@ -21,4 +22,4 @@ Dict::Add('EN GB', 'British English', 'British English', array(
 	'SAML:Error:Invalid_Attribute' => 'SAML authentication failed because the expected attribute \'%1$s\' was not found in the response from the Identity Provider (IdP). Check the error.log file for more information.',
 	'Menu:DelegatedAuthentication' => 'Delegated authentication',
 	'Menu:DelegatedAuthentication+' => 'Configure authentication delegation through an external provider',
-));
+]);

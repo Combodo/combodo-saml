@@ -1,10 +1,11 @@
 <?php
+
 /**
  * Localized data
  *
  * @copyright Copyright (C) 2010-2024 Combodo SAS
  * @license    https://opensource.org/licenses/AGPL-3.0
- * 
+ *
  */
 /**
  *
@@ -21,5 +22,5 @@ Dict::Add('FR FR', 'French', 'Français', [
 	'SAML:SimpleSaml:GenerateSimpleSamlConf' => 'Générer la configuration SimpleSaml',
 	'SAML:SimpleSaml:Instructions' => 'Ajouter ces lignes à la configuration: simplesamlphp/metadata/saml20-sp-remote.php',
 	'Menu:DelegatedAuthentication' => 'Authentification déléguée',
-	'Menu:DelegatedAuthentication+'=> 'Configurer l\'authentification via un fournisseur de service',
+	'Menu:DelegatedAuthentication+' => 'Configurer l\'authentification via un fournisseur de service',
 ]);

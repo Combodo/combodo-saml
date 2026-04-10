@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   Copyright (C) 2010-2019 Combodo SARL
  * @license     https://www.combodo.com/documentation/combodo-software-license.html
@@ -12,9 +13,9 @@
 use Combodo\iTop\Application\Helper\Session;
 use Combodo\iTop\Extension\Saml\Logger;
 
-require_once(dirname(__DIR__, 2) . '/approot.inc.php');
-require_once (APPROOT.'bootstrap.inc.php');
-require_once (APPROOT.'application/startup.inc.php');
+require_once(dirname(__DIR__, 2).'/approot.inc.php');
+require_once(APPROOT.'bootstrap.inc.php');
+require_once(APPROOT.'application/startup.inc.php');
 
 if (class_exists('Combodo\iTop\Application\Helper\Session')) {
 	Session::Start();
@@ -25,18 +26,17 @@ $oAuth = new OneLogin\Saml2\Auth($oConfig->GetSettings());
 
 Logger::Debug('Processing Login Response');
 if (isset($_POST['SAMLResponse'])) {
-    $sSAMLResponse = base64_decode($_POST['SAMLResponse']) ?: $_POST['SAMLResponse'];
-    Logger::Debug(sprintf("POST SAMLResponse is:\n%s", $sSAMLResponse));
+	$sSAMLResponse = base64_decode($_POST['SAMLResponse']) ?: $_POST['SAMLResponse'];
+	Logger::Debug(sprintf("POST SAMLResponse is:\n%s", $sSAMLResponse));
 } else {
-    Logger::Debug(sprintf("POST SAMLResponse is empty"));
+	Logger::Debug(sprintf("POST SAMLResponse is empty"));
 }
 
 $oAuth->processResponse();
 
 $aErrors = $oAuth->getErrors();
 
-if (!empty($aErrors))
-{
+if (!empty($aErrors)) {
 	echo '<p><b>'.Dict::S('SAML:Error:ErrorOccurred').'</b></p>';
 	echo '<p>'.Dict::S('SAML:Error:CheckTheLogFileForMoreInformation').'</p>';
 	Logger::Debug('Processing of Login Response failed: '.implode("\n", $aErrors));
@@ -45,8 +45,7 @@ if (!empty($aErrors))
 }
 Logger::Debug('Login Response Ok.');
 
-if (!$oAuth->isAuthenticated())
-{
+if (!$oAuth->isAuthenticated()) {
 	echo "<p>".Dict::S('SAML:Error:NotAuthenticated')."</p>";
 	Logger::Error('isAuthenticated() returned false!');
 	Logger::Error('Last error reason: '.$oAuth->getLastErrorReason());
@@ -55,21 +54,16 @@ if (!$oAuth->isAuthenticated())
 
 $aUserAttributes = $oAuth->getAttributes();
 $sNameId = MetaModel::GetModuleSetting('combodo-saml', 'nameid', 'uid');
-if ($sNameId == '')
-{
+if ($sNameId == '') {
 	// Enforce a default / non-empty value in case the conf gets garbled
 	$sNameId = 'uid';
 }
 
-if (strcasecmp($sNameId, 'nameid') == 0)
-{
+if (strcasecmp($sNameId, 'nameid') == 0) {
 	$sLogin = $oAuth->getNameId();
 	Logger::Debug("Using nameId as the 'login', the value is '$sLogin'");
-}
-else
-{
-	if (!array_key_exists($sNameId, $aUserAttributes))
-	{
+} else {
+	if (!array_key_exists($sNameId, $aUserAttributes)) {
 		echo "<p>".Dict::Format('SAML:Error:Invalid_Attribute', $sNameId)."</p>";
 		echo '<p>'.Dict::S('SAML:Error:CheckTheLogFileForMoreInformation').'</p>';
 		Logger::Error("SAML authentication failed because the expected attribute '$sNameId' was not found in the IdP response.");
@@ -92,8 +86,7 @@ $aParams = [
 	'login_saml' => 'connected',
 	'login_mode' => 'saml',
 ];
-if (isset($_POST['RelayState']) && OneLogin\Saml2\Utils::getSelfURL() != $_POST['RelayState'] && utils::StartsWith($_POST['RelayState'], utils::GetAbsoluteUrlAppRoot()))
-{
+if (isset($_POST['RelayState']) && OneLogin\Saml2\Utils::getSelfURL() != $_POST['RelayState'] && utils::StartsWith($_POST['RelayState'], utils::GetAbsoluteUrlAppRoot())) {
 	Logger::Debug('Redirecting to: '.$_POST['RelayState']);
 	$oAuth->redirectTo($_POST['RelayState'], $aParams);
 } else {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @copyright   Copyright (C) 2010-2019 Combodo SARL
  * @license     https://www.combodo.com/documentation/combodo-software-license.html
@@ -11,7 +12,7 @@
 SetupWebPage::AddModule(
 	__FILE__, // Path to the current file, all other file names are relative to the directory containing this file
 	'combodo-saml/1.2.6',
-	array(
+	[
 		// Identification
 		//
 		'label' => 'SAML SSO',
@@ -19,45 +20,45 @@ SetupWebPage::AddModule(
 
 		// Setup
 		//
-		'dependencies' => array(
+		'dependencies' => [
 			'itop-config-mgmt/2.6.0',
 			'itop-config/2.6.0',
-		),
+		],
 		'mandatory' => false,
 		'visible' => true,
 
 		// Components
 		//
-		'datamodel' => array(
+		'datamodel' => [
 			'model.combodo-saml.php',
 			'src/SAMLLoginExtension.php',
 			'vendor/autoload.php',
-		),
-		'webservice' => array(
-			
-		),
-		'data.struct' => array(
+		],
+		'webservice' => [
+
+		],
+		'data.struct' => [
 			// add your 'structure' definition XML files here,
-		),
-		'data.sample' => array(
+		],
+		'data.sample' => [
 			// add your sample data XML files here,
-		),
-		
+		],
+
 		// Documentation
 		//
 		'doc.manual_setup' => '', // hyperlink to manual setup documentation, if any
 		'doc.more_information' => '', // hyperlink to more information, if any
 
-        // Security
-        'delegated_authentication_endpoints' => [
-            'acs.php',
-            'sls.php',
-            'sp-metadata.php'
-        ],
+		// Security
+		'delegated_authentication_endpoints' => [
+			'acs.php',
+			'sls.php',
+			'sp-metadata.php',
+		],
 
 		// Default settings
 		//
-		'settings' => array(
+		'settings' => [
 			// If 'strict' is True, then the PHP Toolkit will reject unsigned
 			// or unencrypted messages if it expects them to be signed or encrypted.
 			// Also it will reject the messages if the SAML standard is not strictly
@@ -66,11 +67,11 @@ SetupWebPage::AddModule(
 			// Enable debug mode (to print errors).
 			'debug' => false,
 			// Identity Provider Data that we want connected with our SP.
-			'idp' => array (
+			'idp' =>  [
 				// Identifier of the IdP entity  (must be a URI)
 				'entityId' => '',
 				// SSO endpoint info of the IdP. (Authentication Request protocol)
-				'singleSignOnService' => array (
+				'singleSignOnService' =>  [
 					// URL Target of the IdP where the Authentication Request Message
 					// will be sent.
 					'url' => '',
@@ -78,9 +79,9 @@ SetupWebPage::AddModule(
 					// message. OneLogin Toolkit supports the HTTP-Redirect binding
 					// only for this endpoint.
 					'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
-				),
+				],
 				// SLO endpoint info of the IdP.
-				'singleLogoutService' => array (
+				'singleLogoutService' =>  [
 					// URL Location of the IdP where SLO Request will be sent.
 					'url' => '',
 					// URL location of the IdP where the SP will send the SLO Response (ResponseLocation)
@@ -90,7 +91,7 @@ SetupWebPage::AddModule(
 					// message. OneLogin Toolkit supports the HTTP-Redirect binding
 					// only for this endpoint.
 					'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
-				),
+				],
 				// Public x509 certificate of the IdP
 				'x509cert' => '',
 				/*
@@ -125,8 +126,7 @@ SetupWebPage::AddModule(
 				//          0 => '<cert2-string>',
 				//      )
 				// ),
-			),
-		),
-	)
+			],
+		],
+	]
 );
-

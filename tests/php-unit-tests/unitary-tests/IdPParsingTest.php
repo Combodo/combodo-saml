@@ -1,4 +1,5 @@
 <?php
+
 namespace Combodo\iTop\Test\UnitTest\Core\CombodoSaml;
 
 use Combodo\iTop\Extension\Saml\Config;
@@ -6,19 +7,19 @@ use Combodo\iTop\Test\UnitTest\ItopTestCase;
 
 class IdPParsingTest extends ItopTestCase
 {
-	
-	public function setup(): void {
+	public function setup(): void
+	{
 		parent::setup();
 		$this->RequireOnceItopFile('env-production/combodo-saml/src/Config.php');
 	}
-	
+
 	/**
 	 * Test that we are able to parse the meta information returned by a SimpleSAML Identity Provider
 	 */
 	public function testParseIdPSimpleSaml()
 	{
 		$sXML = file_get_contents(__DIR__.'/asset/simple-saml.xml');
-		$aErrors = array();
+		$aErrors = [];
 		$aIdP = Config::ParseIdPMetaData($sXML, $aErrors);
 		$this->assertEmpty($aErrors);
 		$this->assertEquals($aIdP['entityId'], 'https://idp.test.com/simplesaml/saml2/idp/metadata.php');
@@ -29,14 +30,14 @@ class IdPParsingTest extends ItopTestCase
 		$this->assertEquals(count($aIdP['singleLogoutService']), 3);
 		$this->assertEquals($aIdP['singleLogoutService']['binding'], Config::BINDING_HTTP_REDIRECT);
 	}
-	
+
 	/**
 	 * Test that we are able to parse the meta information returned by a Keycloak Identity Provider
 	 */
 	public function testParseIdPKeycloak()
 	{
 		$sXML = file_get_contents(__DIR__.'/asset/keycloak.xml');
-		$aErrors = array();
+		$aErrors = [];
 		$aIdP = Config::ParseIdPMetaData($sXML, $aErrors);
 		$this->assertEmpty($aErrors);
 
@@ -47,4 +48,3 @@ class IdPParsingTest extends ItopTestCase
 		$this->assertEquals($aIdP['singleLogoutService']['binding'], Config::BINDING_HTTP_REDIRECT);
 	}
 }
-

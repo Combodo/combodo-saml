@@ -1,12 +1,13 @@
 <?php
+
 /**
  * @copyright   Copyright (C) 2019-2024 Combodo SAS
  * @license     https://www.combodo.com/documentation/combodo-software-license.html
  *
  */
 require_once('../approot.inc.php');
-require_once (APPROOT.'bootstrap.inc.php');
-require_once (APPROOT.'application/startup.inc.php');
+require_once(APPROOT.'bootstrap.inc.php');
+require_once(APPROOT.'application/startup.inc.php');
 
 use Combodo\iTop\Application\UI\Base\Component\CollapsibleSection\CollapsibleSectionUIBlockFactory;
 use Combodo\iTop\Application\UI\Base\Component\Html\HtmlFactory;
@@ -20,12 +21,11 @@ function SamlUseLegacy()
 	return SAML_XML_LEGACY_VERSION !== '' ? version_compare(ITOP_DESIGN_LATEST_VERSION, SAML_XML_LEGACY_VERSION, '<=') : false;
 }
 
-
 function DisplayInputForm(WebPage $oP, $sUrl, $sRawXml)
 {
 	$sSafeUrl = htmlentities($sUrl, ENT_QUOTES, 'UTF-8');
 	$oP->add(
-<<<HTML
+		<<<HTML
 	<div class="ibo-is-html-content saml-input-form">
 	<h2>Importing the Identity Provider meta data</h2>
 	<form method="post">
@@ -34,7 +34,7 @@ function DisplayInputForm(WebPage $oP, $sUrl, $sRawXml)
 HTML
 	);
 	$sSafeXml = htmlentities($sRawXml, ENT_QUOTES, 'UTF-8');
-	if(SamlUseLegacy()){
+	if (SamlUseLegacy()) {
 		$oP->StartCollapsibleSection('Paste the XML meta data:', false, 'xml_direct_input');
 		$oP->add(
 			<<<HTML
@@ -43,8 +43,7 @@ HTML
 		);
 		$oP->EndCollapsibleSection();
 
-	}
-	else{
+	} else {
 		$oInputCollapsibleBlock = CollapsibleSectionUIBlockFactory::MakeStandard('Paste the XML meta data');
 		$oHtml = HtmlFactory::MakeHtmlContent(
 			<<<HTML
@@ -55,51 +54,42 @@ HTML
 		$oP->AddUiBlock($oInputCollapsibleBlock);
 	}
 	$oP->add(
-<<<HTML
+		<<<HTML
 		<p><button class="ibo-button ibo-is-regular ibo-is-secondary" type="submit">Check Meta Data</button></p>
 		<input type="hidden" name="operation" value="check"/>
 	</form>
 	</div>
 HTML
 	);
-	
+
 }
 
 function CheckMetaData(WebPage $oP, $sUrl, $sRawXml)
 {
 	DisplayInputForm($oP, $sUrl, $sRawXml);
-	$aErrors = array();
+	$aErrors = [];
 	$sMetaData = GetMetaData($sUrl, $sRawXml);
-	if ($sMetaData === false)
-	{
+	if ($sMetaData === false) {
 		$aErrors[] = 'Failed to read the XML data from the supplied URL';
-		$aIdP = array();
-	}
-	else if (($sUrl == '') && ($sRawXml == ''))
-	{
-	    $aErrors[] = 'Please either supply a valid URL or paste the XML meta data';
-	    $aIdP = array();
-	}
-	else
-	{
+		$aIdP = [];
+	} elseif (($sUrl == '') && ($sRawXml == '')) {
+		$aErrors[] = 'Please either supply a valid URL or paste the XML meta data';
+		$aIdP = [];
+	} else {
 		$aIdP = Config::ParseIdPMetaData($sMetaData, $aErrors);
 	}
-	
-	if (count($aErrors) > 0)
-	{
+
+	if (count($aErrors) > 0) {
 		$oP->add('<div class="header_message message_error">');
-		foreach($aErrors as $sError)
-		{
+		foreach ($aErrors as $sError) {
 			$oP->p(htmlentities($sError, ENT_QUOTES, 'UTF-8'));
 		}
 		$oP->add('</div>');
-	}
-	else
-	{
+	} else {
 		$sSafeURL = htmlentities($sUrl, ENT_QUOTES, 'UTF-8');
 		$sSafeXml = htmlentities($sRawXml, ENT_QUOTES, 'UTF-8');
 		$oP->add(
-<<<HTML
+			<<<HTML
 		<div class="header_message message_ok ibo-alert ibo-is-success ibo-is-opened">Ok, the meta data look correct.</div>
 		<form method="post">
 		<input type="hidden" name="operation" value="update"/>
@@ -109,24 +99,22 @@ function CheckMetaData(WebPage $oP, $sUrl, $sRawXml)
 		</form>
 HTML
 		);
-		if(SamlUseLegacy()) {
+		if (SamlUseLegacy()) {
 			$oP->StartCollapsibleSection('PHP configuration:', false, 'saml_conf');
 			$oP->add('<pre>'.var_export($aIdP, true).'</pre>');
 			$oP->EndCollapsibleSection();
-		}
-		else{
+		} else {
 			$oPHPConfCollapsibleBlock = CollapsibleSectionUIBlockFactory::MakeStandard('PHP configuration');
 			$oHtml = HtmlFactory::MakeHtmlContent('<pre>'.var_export($aIdP, true).'</pre>');
 			$oPHPConfCollapsibleBlock->AddSubBlock($oHtml);
 			$oP->AddUiBlock($oPHPConfCollapsibleBlock);
 		}
 	}
-	if(SamlUseLegacy()) {
+	if (SamlUseLegacy()) {
 		$oP->StartCollapsibleSection('Raw Meta Data:', false, 'saml_metadata');
 		$oP->add('<pre>'.htmlentities($sMetaData, ENT_QUOTES, 'UTF-8').'</pre>');
 		$oP->EndCollapsibleSection();
-	}
-	else{
+	} else {
 		$oRawMetaCollapsibleBlock = CollapsibleSectionUIBlockFactory::MakeStandard('Raw Meta Data');
 		$oHtml = HtmlFactory::MakeHtmlContent('<pre>'.htmlentities($sMetaData, ENT_QUOTES, 'UTF-8').'</pre>');
 		$oRawMetaCollapsibleBlock->AddSubBlock($oHtml);
@@ -138,31 +126,26 @@ function UpdateIdPConfiguration(WebPage $oP, $sUrl, $sRawXml)
 {
 	$sMetaData = GetMetaData($sUrl, $sRawXml);
 
-	$aErrors = array();
+	$aErrors = [];
 	$aIdP = Config::ParseIdPMetaData($sMetaData, $aErrors);
-	if (count($aErrors) == 0)
-	{
+	if (count($aErrors) == 0) {
 		$oConf = Metamodel::GetConfig();
 
 		// Make sure that SAML is enabled
 		$aAllowedLoginTypes = $oConf->GetAllowedLoginTypes();
-		if (!in_array('saml', $aAllowedLoginTypes))
-		{
+		if (!in_array('saml', $aAllowedLoginTypes)) {
 			// Add 'saml' after 'form'
-			$aModifiedLoginTypes = array();
-			foreach($aAllowedLoginTypes as $sType)
-			{
+			$aModifiedLoginTypes = [];
+			foreach ($aAllowedLoginTypes as $sType) {
 				$aModifiedLoginTypes[] = $sType;
-				if ($sType == 'form')
-				{
+				if ($sType == 'form') {
 					$aModifiedLoginTypes[] = 'saml';
 				}
 			}
 			$oConf->SetAllowedLoginTypes($aModifiedLoginTypes);
 		}
 
-		if ($sUrl != '')
-		{
+		if ($sUrl != '') {
 			$oConf->SetModuleSetting('combodo-saml', 'idp_metadata_url', $sUrl);
 		}
 		$oConf->SetModuleSetting('combodo-saml', 'idp', $aIdP);
@@ -170,12 +153,9 @@ function UpdateIdPConfiguration(WebPage $oP, $sUrl, $sRawXml)
 		$oConf->WriteToFile();
 		@chmod($oConf->GetLoadedFile(), 0444); // Read-only
 		$oP->add('<div class="header_message message_ok">iTop Configuration updated!!</div>');
-	}
-	else 
-	{
+	} else {
 		$oP->add('<div class="header_message message_error">');
-		foreach($aErrors as $sError)
-		{
+		foreach ($aErrors as $sError) {
 			$oP->p(htmlentities($sError, ENT_QUOTES, 'UTF-8'));
 		}
 		$oP->add('</div>');
@@ -193,20 +173,17 @@ function UpdateIdPConfiguration(WebPage $oP, $sUrl, $sRawXml)
  */
 function GetMetaData($sUrl, $sXmlMetaData)
 {
-    if (empty($sUrl))
-    {
-        return $sXmlMetaData;
-    }
-    else
-    {
-        return @file_get_contents($sUrl);
-    }
+	if (empty($sUrl)) {
+		return $sXmlMetaData;
+	} else {
+		return @file_get_contents($sUrl);
+	}
 }
 
 function DisplayWelcomePage(WebPage $oP)
 {
 	$sModuleURL = utils::GetAbsoluteUrlModulesRoot().'/combodo-saml';
-	if(SamlUseLegacy()) {
+	if (SamlUseLegacy()) {
 		$oP->add(
 			<<<HTML
 		<h1>Single Sign-On configuration using SAML</h1>
@@ -222,10 +199,9 @@ function DisplayWelcomePage(WebPage $oP)
 		<hr/>
 HTML
 		);
-	}
-	else{
+	} else {
 		$oHeaderCollapsibleBlock = CollapsibleSectionUIBlockFactory::MakeStandard('Single Sign-On configuration using SAML');
-		$sHtmlContent = 
+		$sHtmlContent =
 			<<<HTML
 		<div class="saml-welcome-content">
 		<div>
@@ -242,12 +218,12 @@ HTML
 		</div>
 HTML;
 		$oHtml = HtmlFactory::MakeHtmlContent($sHtmlContent);
-		$oHeaderCollapsibleBlock->AddSubBlock($oHtml);	
-		$oHeaderCollapsibleBlock->SetOpenedByDefault(true);	
+		$oHeaderCollapsibleBlock->AddSubBlock($oHtml);
+		$oHeaderCollapsibleBlock->SetOpenedByDefault(true);
 		$oP->AddUiBlock($oHeaderCollapsibleBlock);
 	}
 
-	$sUrl = MetaModel::GetModuleSetting('combodo-saml', 'idp_metadata_url','');
+	$sUrl = MetaModel::GetModuleSetting('combodo-saml', 'idp_metadata_url', '');
 	DisplayInputForm($oP, $sUrl, '');
 
 	$oConfig = new Config();
@@ -256,12 +232,12 @@ HTML;
 	$sSafeX509Cert = isset($aSettings['sp']['x509cert']) ? htmlentities($aSettings['sp']['x509cert'], ENT_QUOTES, 'UTF-8') : '';
 
 	$bDebug = isset($aSettings['debug']) ? (bool)$aSettings['debug'] : false;
-	
+
 	$sSafeNameID = MetaModel::GetModuleSetting('combodo-saml', 'nameid', '');
 	$sMetaDataURI = utils::GetAbsoluteUrlModulePage('combodo-saml', "sp-metadata.php");
 	$sDebugChecked = $bDebug ? 'checked' : '';
 	$oP->add(
-<<<HTML
+		<<<HTML
 <hr/>
 <div class="ibo-is-html-content">
 <form id="certificate_form" method="post">
@@ -308,31 +284,27 @@ function UpdateCertificate(WebPage $oP)
 	$sNameID = utils::ReadPostedParam('name_id', 0, false, 'raw_data');
 	$sX509Cert = utils::ReadPostedParam('x509cert', '', false, 'raw_data');
 	$sPrivateKey = utils::ReadPostedParam('private_key', '', false, 'raw_data');
-	
+
 	$oConf->SetModuleSetting('combodo-saml', 'nameid', $sNameID);
 	$oConf->SetModuleSetting('combodo-saml', 'debug', $bDebug);
-	
-	$aSP = $oConf->GetModuleSetting('combodo-saml', 'sp', array());
-	$aSP['entityId'] = utils::GetAbsoluteUrlModulesRoot() . 'combodo-saml';
+
+	$aSP = $oConf->GetModuleSetting('combodo-saml', 'sp', []);
+	$aSP['entityId'] = utils::GetAbsoluteUrlModulesRoot().'combodo-saml';
 	$aSP['x509cert'] = $sX509Cert;
-	if ($sPrivateKey !== HIDDEN_PRIVATE_KEY)
-	{
+	if ($sPrivateKey !== HIDDEN_PRIVATE_KEY) {
 		$aSP['privateKey'] = $sPrivateKey;
 	}
 	$oConf->SetModuleSetting('combodo-saml', 'sp', $aSP);
 
-	$aSecurity = $oConf->GetModuleSetting('combodo-saml', 'security', array());
-	if ($sX509Cert != '')
-	{
+	$aSecurity = $oConf->GetModuleSetting('combodo-saml', 'security', []);
+	if ($sX509Cert != '') {
 		// When a certificate is configured, request that the assertions be signed
 		$aSecurity['wantMessagesSigned'] = false; // Forcing this to true seems to cause the logoff to fail with SimpleSAML since the client expects ALL messages to be signed
 		$aSecurity['wantAssertionsSigned'] = true;
 		$aSecurity['authnRequestsSigned'] = true;
 		$aSecurity['logoutRequestSigned'] = true;
 		$aSecurity['logoutResponseSigned'] = true;
-	}
-	else
-	{
+	} else {
 		// No certificate, don't try to sign the messages !
 		$aSecurity['wantMessagesSigned'] = false;
 		$aSecurity['wantAssertionsSigned'] = false;
@@ -357,17 +329,15 @@ LoginWebPage::DoLogin(); // Check user rights and prompt if needed
 ApplicationMenu::CheckMenuIdEnabled('SAMLConfiguration');
 
 $oP = new iTopWebPage('SAML Configuration');
-if(!SamlUseLegacy()){
+if (!SamlUseLegacy()) {
 	$oP->add_saas('env-'.utils::GetCurrentEnvironment().'/combodo-saml/css/configuration.scss');
 }
-try
-{
+try {
 	$sOperation = utils::ReadParam('operation', '');
 	$sUrl = utils::ReadParam('url', '', false, 'raw_data');
 	$sRawXml = utils::ReadParam('xml_meta_data', '', false, 'raw_data');
 
-	switch($sOperation)
-	{
+	switch ($sOperation) {
 		case 'update':
 			UpdateIdPConfiguration($oP, $sUrl, $sRawXml);
 			break;
@@ -379,17 +349,15 @@ try
 		case 'idp':
 			DisplayInputForm($oP, $sUrl, $sRawXml);
 			break;
-			
+
 		case 'update_certificate':
 			UpdateCertificate($oP);
 			break;
-		    
+
 		default:
 			DisplayWelcomePage($oP);
 	}
-}
-catch (Exception $e)
-{
+} catch (Exception $e) {
 	$oP->p('ERROR: '.$e->getMessage());
 }
 $oP->output();
